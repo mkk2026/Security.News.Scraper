@@ -29,7 +29,7 @@ An automated cybersecurity intelligence platform that monitors, aggregates, and 
 ### Installation
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/mkk2026/Security.News.Scraper.git
 cd Security.News.Scraper
 
 bun install
