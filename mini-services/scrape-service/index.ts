@@ -5,7 +5,7 @@ const prisma = new PrismaClient({
 })
 
 const SCRAPE_INTERVAL = 3600000 // 1 hour in milliseconds
-const SCRAPE_API_URL = 'http://localhost:3000/api/scrape'
+const SCRAPE_API_URL = 'http://localhost:3008/api/scrape'
 const SCRAPE_CONFIG_SOURCE_ID = 'scheduled-scraper'
 
 interface ScrapeStats {
@@ -83,10 +83,12 @@ class ScrapeScheduler {
     console.log(`🚀 Starting scrape run #${this.stats.totalRuns}`)
 
     try {
+      const secretToken = process.env.API_SECRET_TOKEN
       const response = await fetch(SCRAPE_API_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          ...(secretToken ? { 'Authorization': `Bearer ${secretToken}` } : {}),
         },
       })
 
