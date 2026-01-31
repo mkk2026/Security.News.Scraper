@@ -1,6 +1,6 @@
 # Security News Scraper
 
-![Demo](rtx.gif)
+![Demo](https://raw.githubusercontent.com/mkk2026/Security.News.Scraper/master/rtx.gif)
 
 An automated cybersecurity intelligence platform that monitors, aggregates, and analyzes security threats from multiple trusted sources in real-time.
 
