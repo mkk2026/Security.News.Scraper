@@ -1,5 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { unstable_cache } from 'next/cache'
 import { db } from '@/lib/db'
+
+// Cache dashboard statistics to reduce DB load
+// Revalidates every 60 seconds or when manually invalidated
+const getStats = unstable_cache(
+  async () => {
+    const [totalArticles, totalCves, criticalCount, highCount] = await Promise.all([
+      db.securityArticle.count(),
+      db.cve.count(),
+      db.securityArticle.count({ where: { severityLevel: 'CRITICAL' } }),
+      db.securityArticle.count({ where: { severityLevel: 'HIGH' } }),
+    ])
+
+    return {
+      totalArticles,
+      totalCves,
+      criticalCount,
+      highCount,
+    }
+  },
+  ['dashboard-stats'],
+  {
+    revalidate: 60,
+    tags: ['dashboard-stats'],
+  }
+)
 
 export async function GET(request: NextRequest) {
   try {
@@ -42,20 +68,8 @@ export async function GET(request: NextRequest) {
       skip: offset,
     })
 
-    // Get statistics
-    const [totalArticles, totalCves, criticalCount, highCount] = await Promise.all([
-      db.securityArticle.count(),
-      db.cve.count(),
-      db.securityArticle.count({ where: { severityLevel: 'CRITICAL' } }),
-      db.securityArticle.count({ where: { severityLevel: 'HIGH' } }),
-    ])
-
-    const stats = {
-      totalArticles,
-      totalCves,
-      criticalCount,
-      highCount,
-    }
+    // Get statistics (cached)
+    const stats = await getStats()
 
     return NextResponse.json({
       articles,

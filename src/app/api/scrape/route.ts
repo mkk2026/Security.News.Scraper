@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { revalidateTag } from 'next/cache'
 import { db } from '@/lib/db'
 import { scrapeAllSources } from '@/lib/scrapers/web-scraper'
 import { analyzeArticleContent, generateContentHash, isDuplicateArticle } from '@/lib/scrapers/cve-extractor'
@@ -128,6 +129,11 @@ export async function POST(request: NextRequest) {
     }
 
     console.log(`Scraping complete. New articles: ${newArticlesCount}, New CVEs: ${newCvesCount}`)
+
+    // Invalidate stats cache if new data was added
+    if (newArticlesCount > 0 || newCvesCount > 0) {
+      revalidateTag('dashboard-stats')
+    }
 
     return NextResponse.json({
       success: true,
