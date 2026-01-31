@@ -1,0 +1,102 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Post {
+  id        String   @id @default(cuid())
+  title     String
+  content   String?
+  published Boolean  @default(false)
+  authorId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SecurityArticle {
+  id          String   @id @default(cuid())
+  url         String   @unique
+  title       String
+  summary     String?
+  content     String?
+  source      String   // 'krebs', 'hacker-news', 'bleeping-computer', 'security-week'
+  sourceName  String   // Human-readable source name
+  publishedAt DateTime
+  scrapedAt   DateTime @default(now())
+
+  // Severity scoring
+  severityScore     Float?   // 0-10 based on CVSS or keywords
+  severityLevel     String?  // 'LOW', 'MEDIUM', 'HIGH', 'CRITICAL'
+
+  // Duplicate detection
+  contentHash String?
+
+  // Relationships
+  cves       Cve[]
+
+  @@index([publishedAt])
+  @@index([source])
+  @@index([severityLevel])
+}
+
+model Cve {
+  id          String   @id @default(cuid())
+  cveId       String   @unique // e.g., CVE-2024-12345
+  description String?
+  cvssScore   Float?
+  severity    String?  // 'LOW', 'MEDIUM', 'HIGH', 'CRITICAL'
+  affectedSoftware String?
+
+  // Relationships
+  articles    SecurityArticle[]
+
+  @@index([cveId])
+  @@index([cvssScore])
+  @@index([severity])
+}
+
+model ScrapeConfig {
+  id                String   @id @default(cuid())
+  source            String   @unique
+  enabled           Boolean  @default(true)
+  rssUrl            String?
+  lastScrapedAt     DateTime?
+  scrapeFrequency   Int      @default(3600) // in seconds
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model Notification {
+  id          String   @id @default(cuid())
+  type        String   // 'email', 'webhook'
+  enabled     Boolean  @default(true)
+  config      String   // JSON string for configuration
+
+  // Alert criteria
+  minCvssScore    Float?
+  severityLevel   String?  // 'LOW', 'MEDIUM', 'HIGH', 'CRITICAL'
+  keywords        String?  // Comma-separated keywords
+  cveIds          String?  // Comma-separated CVE IDs to monitor
+
+  lastNotifiedAt  DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
