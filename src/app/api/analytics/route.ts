@@ -3,8 +3,7 @@ import { db } from '@/lib/db'
 
 export async function GET(request: NextRequest) {
   try {
-    const thirtyDaysAgo = new Date()
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+    // Optimized: Removed unused thirtyDaysAgo calculation
 
     const [severityStats, sourceStats, topCves] = await Promise.all([
       db.securityArticle.groupBy({
@@ -16,8 +15,16 @@ export async function GET(request: NextRequest) {
         by: ['source'],
         _count: { id: true }
       }),
+      // Optimized: Use _count aggregation instead of fetching all article IDs
       db.cve.findMany({
-        include: { articles: { select: { id: true } } },
+        select: {
+          cveId: true,
+          cvssScore: true,
+          severity: true,
+          _count: {
+            select: { articles: true }
+          }
+        },
         orderBy: { articles: { _count: 'desc' } },
         take: 10
       })
@@ -36,7 +43,7 @@ export async function GET(request: NextRequest) {
         })),
         topCves: topCves.map(c => ({
           cveId: c.cveId,
-          articleCount: c.articles.length,
+          articleCount: c._count.articles,
           cvssScore: c.cvssScore,
           severity: c.severity
         }))
