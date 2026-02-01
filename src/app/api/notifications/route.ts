@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { createNotificationConfig, getNotificationConfigs, initializeDefaultNotifications } from '@/lib/notifications/notification-service'
+import { validateApiRequest } from '@/lib/auth'
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const authResponse = validateApiRequest(request)
+  if (authResponse) return authResponse
+
   try {
     const configs = await getNotificationConfigs()
     return NextResponse.json({
@@ -19,6 +23,9 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  const authResponse = validateApiRequest(request)
+  if (authResponse) return authResponse
+
   try {
     const body = await request.json()
 

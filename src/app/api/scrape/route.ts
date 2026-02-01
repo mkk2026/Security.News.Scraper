@@ -3,8 +3,12 @@ import { revalidateTag } from 'next/cache'
 import { db } from '@/lib/db'
 import { scrapeAllSources } from '@/lib/scrapers/web-scraper'
 import { analyzeArticleContent, generateContentHash, isDuplicateArticle } from '@/lib/scrapers/cve-extractor'
+import { validateApiRequest } from '@/lib/auth'
 
 export async function POST(request: NextRequest) {
+  const authResponse = validateApiRequest(request)
+  if (authResponse) return authResponse
+
   try {
     console.log('Starting scrape request...')
 
