@@ -56,10 +56,29 @@ export async function GET(request: NextRequest) {
     }
 
     // Fetch articles with related CVEs
+    // Optimized: Select only necessary fields to reduce payload size
     const articles = await db.securityArticle.findMany({
       where,
-      include: {
-        cves: true,
+      select: {
+        id: true,
+        url: true,
+        title: true,
+        summary: true,
+        source: true,
+        sourceName: true,
+        publishedAt: true,
+        scrapedAt: true,
+        severityScore: true,
+        severityLevel: true,
+        cves: {
+          select: {
+            id: true,
+            cveId: true,
+            cvssScore: true,
+            severity: true,
+            affectedSoftware: true,
+          },
+        },
       },
       orderBy: {
         publishedAt: 'desc',
