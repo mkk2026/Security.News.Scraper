@@ -273,6 +273,7 @@ export default function SecurityDashboard() {
                 <Button
                   onClick={triggerScrape}
                   disabled={loading}
+                  aria-label={loading ? "Scraping in progress" : "Scrape security news"}
                   className="bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg shadow-primary/25 gap-2"
                   size="lg"
                 >
@@ -433,6 +434,7 @@ export default function SecurityDashboard() {
                     <div className="relative group">
                       <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-primary transition-colors" />
                       <Input
+                        aria-label="Search articles, CVEs, or software"
                         placeholder="Search articles, CVEs, or software..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
@@ -442,7 +444,7 @@ export default function SecurityDashboard() {
                   </div>
                   <div className="flex gap-2 flex-wrap">
                     <Select value={severityFilter} onValueChange={setSeverityFilter}>
-                      <SelectTrigger className="w-[160px] h-12 bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700">
+                      <SelectTrigger aria-label="Filter by severity" className="w-[160px] h-12 bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700">
                         <Filter className="h-4 w-4 mr-2 text-slate-400" />
                         <SelectValue placeholder="Severity" />
                       </SelectTrigger>
@@ -455,7 +457,7 @@ export default function SecurityDashboard() {
                       </SelectContent>
                     </Select>
                     <Select value={sourceFilter} onValueChange={setSourceFilter}>
-                      <SelectTrigger className="w-[180px] h-12 bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700">
+                      <SelectTrigger aria-label="Filter by source" className="w-[180px] h-12 bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700">
                         <Globe className="h-4 w-4 mr-2 text-slate-400" />
                         <SelectValue placeholder="Source" />
                       </SelectTrigger>
