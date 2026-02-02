@@ -3,8 +3,16 @@ import { revalidateTag } from 'next/cache'
 import { db } from '@/lib/db'
 import { scrapeAllSources } from '@/lib/scrapers/web-scraper'
 import { analyzeArticleContent, generateContentHash, isDuplicateArticle } from '@/lib/scrapers/cve-extractor'
+import { validateApiRequest } from '@/lib/auth'
 
 export async function POST(request: NextRequest) {
+  if (!validateApiRequest(request)) {
+    return NextResponse.json(
+      { success: false, error: 'Unauthorized' },
+      { status: 401 }
+    )
+  }
+
   try {
     console.log('Starting scrape request...')
 
