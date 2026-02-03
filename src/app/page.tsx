@@ -238,6 +238,15 @@ export default function SecurityDashboard() {
 
   const displayedArticles = getSortedArticles(getFilteredArticles(filteredArticles))
 
+  const hasFilters = searchQuery || severityFilter !== 'all' || sourceFilter !== 'all' || activeTab !== 'all'
+
+  const clearFilters = () => {
+    setSearchQuery('')
+    setSeverityFilter('all')
+    setSourceFilter('all')
+    setActiveTab('all')
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-100 to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
       {/* Animated Background */}
@@ -544,9 +553,25 @@ export default function SecurityDashboard() {
                     >
                       <Alert className="bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800">
                         <Search className="h-4 w-4" />
-                        <AlertDescription className="text-slate-600 dark:text-slate-400">
-                          No articles found. Try adjusting your filters or click "Scrape Now" to fetch the latest security news.
-                        </AlertDescription>
+                        <div className="col-start-2">
+                          <AlertDescription className="text-slate-600 dark:text-slate-400 mb-4">
+                            {hasFilters
+                              ? "No articles match your current filters. Try adjusting them or clear all filters."
+                              : "No articles found. Click \"Scrape Now\" to fetch the latest security news."
+                            }
+                          </AlertDescription>
+                          <div className="flex flex-wrap gap-2">
+                            {hasFilters && (
+                              <Button variant="outline" size="sm" onClick={clearFilters}>
+                                Clear Filters
+                              </Button>
+                            )}
+                            <Button variant="default" size="sm" onClick={triggerScrape} disabled={loading}>
+                              {loading ? <RefreshCw className="mr-2 h-3 w-3 animate-spin" /> : <RefreshCw className="mr-2 h-3 w-3" />}
+                              Scrape Now
+                            </Button>
+                          </div>
+                        </div>
                       </Alert>
                     </motion.div>
                   ) : (
