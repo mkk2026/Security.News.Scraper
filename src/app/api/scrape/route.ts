@@ -14,17 +14,6 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    // Check authentication
-    const authHeader = request.headers.get('Authorization')
-    const secretToken = process.env.API_SECRET_TOKEN
-
-    if (secretToken && authHeader !== `Bearer ${secretToken}`) {
-      return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
-        { status: 401 }
-      )
-    }
-
     console.log('Starting scrape request...')
 
     // Scrape articles from all sources

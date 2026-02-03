@@ -1,14 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { createNotificationConfig, getNotificationConfigs, initializeDefaultNotifications } from '@/lib/notifications/notification-service'
+import { validateApiRequest } from '@/lib/auth'
 
 export async function GET(request: NextRequest) {
   try {
     // Check authentication
-    const authHeader = request.headers.get('Authorization')
-    const secretToken = process.env.API_SECRET_TOKEN
-
-    if (secretToken && authHeader !== `Bearer ${secretToken}`) {
+    if (!validateApiRequest(request)) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
         { status: 401 }
@@ -32,10 +30,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     // Check authentication
-    const authHeader = request.headers.get('Authorization')
-    const secretToken = process.env.API_SECRET_TOKEN
-
-    if (secretToken && authHeader !== `Bearer ${secretToken}`) {
+    if (!validateApiRequest(request)) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
         { status: 401 }
