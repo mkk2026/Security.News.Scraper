@@ -7,3 +7,11 @@
 ## 2025-02-18 - [Prisma Over-fetching]
 **Learning:** The articles API was fetching the full `content` field for every article in the list view, which is unused and potentially large.
 **Action:** Use explicit `select` in Prisma `findMany` queries to return only the fields required by the frontend, especially excluding Large Object (LOB) columns.
+
+## 2025-02-19 - [React Derived State]
+**Learning:** The dashboard component was using `useEffect` to update a `filteredArticles` state whenever filters changed. This caused a "render -> effect -> set state -> render" waterfall, doubling the work on every keystroke.
+**Action:** Use `useMemo` to calculate derived state (filtered lists) during the initial render pass, avoiding the extra render cycle and simplifying the data flow.
+
+## 2025-02-19 - [Array State Mutation]
+**Learning:** The sorting function `articles.sort()` sorts in place. When called on a state array (even if aliased), it mutated the underlying state directly, bypassing React's update lifecycle and potentially causing inconsistent UI behavior.
+**Action:** Always create a shallow copy before sorting state arrays: `[...articles].sort(...)`.

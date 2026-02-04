@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import {
   Shield,
   AlertTriangle,
@@ -138,7 +138,6 @@ function Computer(props: any) {
 
 export default function SecurityDashboard() {
   const [articles, setArticles] = useState<SecurityArticle[]>([])
-  const [filteredArticles, setFilteredArticles] = useState<SecurityArticle[]>([])
   const [stats, setStats] = useState<Stats>({ totalArticles: 0, totalCves: 0, criticalCount: 0, highCount: 0 })
   const [loading, setLoading] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
@@ -195,7 +194,7 @@ export default function SecurityDashboard() {
     fetchArticles()
   }, [])
 
-  useEffect(() => {
+  const baseFilteredArticles = useMemo(() => {
     let filtered = articles
 
     if (searchQuery) {
@@ -216,7 +215,7 @@ export default function SecurityDashboard() {
       filtered = filtered.filter(article => article.source === sourceFilter)
     }
 
-    setFilteredArticles(filtered)
+    return filtered
   }, [articles, searchQuery, severityFilter, sourceFilter])
 
   const escapeHtml = (unsafe: string) => {
@@ -234,19 +233,20 @@ export default function SecurityDashboard() {
     return escaped.replace(cveRegex, (match) => `<span class="bg-gradient-to-r from-amber-400 to-orange-400 text-white font-bold px-1.5 py-0.5 rounded text-xs">${match}</span>`)
   }
 
-  const getSortedArticles = (articles: SecurityArticle[]) => {
-    return activeTab === 'recent'
-      ? articles.sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()).slice(0, 10)
-      : articles
-  }
+  const displayedArticles = useMemo(() => {
+    let result = baseFilteredArticles
 
-  const getFilteredArticles = (articles: SecurityArticle[]) => {
-    return activeTab === 'critical'
-      ? articles.filter(article => article.severityLevel === 'CRITICAL' || article.cves.some(cve => cve.severity === 'CRITICAL'))
-      : articles
-  }
+    if (activeTab === 'critical') {
+      result = result.filter(article => article.severityLevel === 'CRITICAL' || article.cves.some(cve => cve.severity === 'CRITICAL'))
+    }
 
-  const displayedArticles = getSortedArticles(getFilteredArticles(filteredArticles))
+    if (activeTab === 'recent') {
+      // Create a shallow copy before sorting to avoid mutating the original array
+      result = [...result].sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()).slice(0, 10)
+    }
+
+    return result
+  }, [baseFilteredArticles, activeTab])
 
   const hasFilters = searchQuery || severityFilter !== 'all' || sourceFilter !== 'all' || activeTab !== 'all'
 
@@ -492,7 +492,7 @@ export default function SecurityDashboard() {
                 </div>
                 <div className="flex items-center justify-between mt-4 text-sm">
                   <span className="text-slate-600 dark:text-slate-400 font-medium">
-                    Showing <span className="text-primary font-bold">{filteredArticles.length}</span> of {articles.length} articles
+                    Showing <span className="text-primary font-bold">{baseFilteredArticles.length}</span> of {articles.length} articles
                   </span>
                   {lastUpdated && (
                     <span className="flex items-center gap-2 text-slate-500 dark:text-slate-500">
@@ -545,7 +545,7 @@ export default function SecurityDashboard() {
 
               <TabsContent value={activeTab} className="mt-6">
                 <ScrollArea className="h-[600px] pr-4">
-                  {loading && filteredArticles.length === 0 ? (
+                  {loading && baseFilteredArticles.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-80">
                       <motion.div
                         animate={{ rotate: 360 }}
