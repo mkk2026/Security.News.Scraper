@@ -7,3 +7,7 @@
 ## 2026-10-18 - Actionable Empty States
 **Learning:** Static empty states (text only) leave users stranded, especially when filters are applied.
 **Action:** Enhance empty states with direct actions (e.g., "Clear Filters", "Refresh") using the `Alert` component's description area to house buttons.
+
+## 2026-10-24 - Skip Links for Keyboard Navigation
+**Learning:** Single-page applications with sticky headers often trap keyboard users or force repetitive tabbing. A "Skip to main content" link is a critical, invisible-until-needed pattern.
+**Action:** Always ensure `layout.tsx` includes a skip link targeting the main content area (`<main id="main-content">`).
