@@ -7,3 +7,8 @@
 **Vulnerability:** `src/app/api/notifications/route.ts` used insecure string comparison (`!==`) for token validation, allowing for potential timing attacks. It also duplicated logic instead of using the centralized `validateApiRequest`.
 **Learning:** Ad-hoc security checks often miss subtleties like timing attacks. Duplicated code drifts and becomes insecure.
 **Prevention:** Enforce usage of centralized, tested security primitives (like `validateApiRequest`) instead of rewriting checks in every handler.
+
+## 2026-02-04 - Stored XSS via Scraper
+**Vulnerability:** Scraper logic in `src/lib/scrapers/web-scraper.ts` was stripping CDATA but not sanitizing HTML from article titles, which were then blindly rendered with `dangerouslySetInnerHTML` in the frontend.
+**Learning:** `stripCDATA` does not sanitize HTML. Scraped content is fundamentally untrusted and must be sanitized before storage or display, especially when using dangerous sinks like `innerHTML`.
+**Prevention:** Always sanitize user/scraped input before persistence. Use dedicated sanitization libraries (like `DOMPurify` or custom escape functions) before passing data to dangerous sinks.

@@ -91,7 +91,7 @@ function parseRSSXML(xml: string, source: SecuritySource): ScrapedArticle[] {
     for (const item of items) {
       // Extract title
       const titleMatch = item.match(/<title[^>]*>(.*?)<\/title>/is)
-      const title = titleMatch ? stripCDATA(titleMatch[1].trim()) : ''
+      const title = titleMatch ? cleanHTML(stripCDATA(titleMatch[1].trim())) : ''
 
       // Extract link
       const linkMatch = item.match(/<link[^>]*>(.*?)<\/link>/is)

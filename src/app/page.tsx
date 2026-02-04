@@ -219,9 +219,19 @@ export default function SecurityDashboard() {
     setFilteredArticles(filtered)
   }, [articles, searchQuery, severityFilter, sourceFilter])
 
+  const escapeHtml = (unsafe: string) => {
+    return unsafe
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
   const highlightCves = (text: string) => {
+    const escaped = escapeHtml(text);
     const cveRegex = /CVE-\d{4}-\d{4,}/gi
-    return text.replace(cveRegex, (match) => `<span class="bg-gradient-to-r from-amber-400 to-orange-400 text-white font-bold px-1.5 py-0.5 rounded text-xs">${match}</span>`)
+    return escaped.replace(cveRegex, (match) => `<span class="bg-gradient-to-r from-amber-400 to-orange-400 text-white font-bold px-1.5 py-0.5 rounded text-xs">${match}</span>`)
   }
 
   const getSortedArticles = (articles: SecurityArticle[]) => {
