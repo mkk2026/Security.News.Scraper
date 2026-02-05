@@ -15,3 +15,7 @@
 ## 2025-02-19 - [Array State Mutation]
 **Learning:** The sorting function `articles.sort()` sorts in place. When called on a state array (even if aliased), it mutated the underlying state directly, bypassing React's update lifecycle and potentially causing inconsistent UI behavior.
 **Action:** Always create a shallow copy before sorting state arrays: `[...articles].sort(...)`.
+
+## 2025-02-21 - [Prisma N+1 Writes]
+**Learning:** The scraping logic was checking existence, checking for content duplicates, and creating articles with CVE relations in a nested loop. This resulted in O(N*M) queries.
+**Action:** Use batch checks for existence (e.g. `where: { url: { in: urls } }`) and Prisma's `connectOrCreate` for nested relations to perform creation and linking in a single query per article.
