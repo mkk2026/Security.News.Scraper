@@ -12,3 +12,8 @@
 **Vulnerability:** Scraper logic in `src/lib/scrapers/web-scraper.ts` was stripping CDATA but not sanitizing HTML from article titles, which were then blindly rendered with `dangerouslySetInnerHTML` in the frontend.
 **Learning:** `stripCDATA` does not sanitize HTML. Scraped content is fundamentally untrusted and must be sanitized before storage or display, especially when using dangerous sinks like `innerHTML`.
 **Prevention:** Always sanitize user/scraped input before persistence. Use dedicated sanitization libraries (like `DOMPurify` or custom escape functions) before passing data to dangerous sinks.
+
+## 2026-02-05 - SSRF in Webhook Notifications
+**Vulnerability:** The notification system allowed arbitrary webhook URLs, enabling SSRF attacks against local/private network resources (e.g., AWS metadata, internal APIs).
+**Learning:** `URL` class in Bun/Node automatically normalizes IP formats (e.g., `127.1` -> `127.0.0.1`), simplifying validation logic. Synchronous validation is partial (no DNS) but critical for defense-in-depth.
+**Prevention:** Validate all user-supplied URLs against a deny-list of private IPs and localhost before performing requests.
