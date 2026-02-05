@@ -32,10 +32,11 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { toast } from '@/hooks/use-toast'
 import { motion, AnimatePresence } from 'framer-motion'
 import dynamic from 'next/dynamic'
+import { AnalyticsSkeleton } from '@/components/AnalyticsSkeleton'
 
 const AnalyticsDashboard = dynamic(() => import('@/components/AnalyticsDashboard'), {
   ssr: false,
-  loading: () => <div className="flex items-center justify-center h-64">Loading analytics...</div>
+  loading: () => <AnalyticsSkeleton />
 })
 
 interface Cve {
