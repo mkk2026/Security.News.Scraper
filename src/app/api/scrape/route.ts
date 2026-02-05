@@ -31,28 +31,40 @@ export async function POST(request: NextRequest) {
     console.log(`Processing ${scrapedArticles.length} scraped articles...`)
 
     let newArticlesCount = 0
-    let newCvesCount = 0
+
+    // Optimization: Batch check for existing URLs to avoid N queries
+    const urls = scrapedArticles.map(a => a.url)
+    const existingArticles = await db.securityArticle.findMany({
+      where: { url: { in: urls } },
+      select: { url: true }
+    })
+    const existingUrls = new Set(existingArticles.map(a => a.url))
+
+    // Optimization: Fetch recent articles once for duplicate checking
+    // Instead of querying inside the loop (N queries), we fetch once.
+    const recentArticles = await db.securityArticle.findMany({
+      take: 50,
+      orderBy: { publishedAt: 'desc' },
+      select: { title: true, summary: true }
+    })
+
+    // Create a mutable array to track articles for duplicate detection
+    // including ones we add in this batch
+    const potentialDuplicates = recentArticles.map(a => ({
+      title: a.title,
+      summary: a.summary
+    }))
 
     // Process each scraped article
     for (const scraped of scrapedArticles) {
       try {
-        // Check for duplicates by URL
-        const existingArticle = await db.securityArticle.findUnique({
-          where: { url: scraped.url },
-          include: { cves: true },
-        })
-
-        if (existingArticle) {
+        // Check for duplicates by URL (in-memory check)
+        if (existingUrls.has(scraped.url)) {
           console.log(`Article already exists: ${scraped.title}`)
           continue
         }
 
-        // Check for content duplicates (similar articles from different sources)
-        const potentialDuplicates = await db.securityArticle.findMany({
-          take: 10,
-          orderBy: { publishedAt: 'desc' },
-        })
-
+        // Check for content duplicates (in-memory check)
         const isDuplicate = potentialDuplicates.some(existing =>
           isDuplicateArticle(
             existing.title,
@@ -74,6 +86,8 @@ export async function POST(request: NextRequest) {
         const contentHash = generateContentHash(`${scraped.title} ${scraped.summary || ''}`)
 
         // Create article
+        // Optimization: Use connectOrCreate to handle CVEs in the same query
+        // This avoids N * (1 query per CVE) + N updates
         const article = await db.securityArticle.create({
           data: {
             url: scraped.url,
@@ -86,49 +100,26 @@ export async function POST(request: NextRequest) {
             severityScore: analysis.severityScore,
             severityLevel: analysis.severityLevel,
             contentHash,
+            cves: {
+              connectOrCreate: analysis.cves.map(cve => ({
+                where: { cveId: cve.cveId },
+                create: {
+                  cveId: cve.cveId,
+                  cvssScore: cve.cvssScore,
+                  severity: cve.severity,
+                }
+              }))
+            }
           },
         })
 
         console.log(`Created article: ${article.title}`)
 
-        // Create or link CVEs
-        for (const cve of analysis.cves) {
-          try {
-            // Check if CVE already exists
-            const existingCve = await db.cve.findUnique({
-              where: { cveId: cve.cveId },
-            })
-
-            let cveRecord
-            if (existingCve) {
-              // Link existing CVE to this article
-              cveRecord = existingCve
-            } else {
-              // Create new CVE
-              cveRecord = await db.cve.create({
-                data: {
-                  cveId: cve.cveId,
-                  cvssScore: cve.cvssScore,
-                  severity: cve.severity,
-                },
-              })
-              newCvesCount++
-              console.log(`Created CVE: ${cve.cveId}`)
-            }
-
-            // Link CVE to article through the relation
-            await db.securityArticle.update({
-              where: { id: article.id },
-              data: {
-                cves: {
-                  connect: { id: cveRecord.id },
-                },
-              },
-            })
-          } catch (cveError) {
-            console.error(`Error processing CVE ${cve.cveId}:`, cveError)
-          }
-        }
+        // Update potentialDuplicates for subsequent iterations in this batch
+        potentialDuplicates.push({
+          title: scraped.title,
+          summary: scraped.summary
+        })
 
         newArticlesCount++
       } catch (articleError) {
@@ -136,10 +127,10 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    console.log(`Scraping complete. New articles: ${newArticlesCount}, New CVEs: ${newCvesCount}`)
+    console.log(`Scraping complete. New articles: ${newArticlesCount}`)
 
     // Invalidate stats cache if new data was added
-    if (newArticlesCount > 0 || newCvesCount > 0) {
+    if (newArticlesCount > 0) {
       revalidateTag('dashboard-stats')
     }
 
@@ -147,7 +138,9 @@ export async function POST(request: NextRequest) {
       success: true,
       message: `Successfully scraped and processed articles`,
       newArticles: newArticlesCount,
-      newCves: newCvesCount,
+      // Note: newCves count is no longer exact due to connectOrCreate optimization
+      // We could count analysis.cves length but that includes existing ones.
+      // Omitted for performance.
       totalProcessed: scrapedArticles.length,
     })
   } catch (error) {
