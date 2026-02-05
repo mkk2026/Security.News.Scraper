@@ -11,3 +11,7 @@
 ## 2026-10-24 - Skip Links for Keyboard Navigation
 **Learning:** Single-page applications with sticky headers often trap keyboard users or force repetitive tabbing. A "Skip to main content" link is a critical, invisible-until-needed pattern.
 **Action:** Always ensure `layout.tsx` includes a skip link targeting the main content area (`<main id="main-content">`).
+
+## 2026-02-05 - Skeleton Loading States
+**Learning:** Replacing text-based loading states (e.g., "Loading analytics...") with layout-mimicking skeletons significantly improves perceived performance and visual continuity.
+**Action:** When implementing dashboards or data-heavy views, always create a corresponding `<ComponentSkeleton />` that matches the component's layout structure.

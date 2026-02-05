@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { TrendingUp, Shield, Globe, Target } from 'lucide-react'
+import { AnalyticsSkeleton } from '@/components/AnalyticsSkeleton'
 
 interface AnalyticsData {
   severityDistribution: { severity: string; count: number }[]
@@ -44,7 +45,7 @@ export default function AnalyticsDashboard() {
   }
 
   if (loading) {
-    return <div className="flex items-center justify-center h-64">Loading analytics...</div>
+    return <AnalyticsSkeleton />
   }
 
   if (!data) {
