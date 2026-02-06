@@ -33,6 +33,7 @@ import { toast } from '@/hooks/use-toast'
 import { motion, AnimatePresence } from 'framer-motion'
 import dynamic from 'next/dynamic'
 import { AnalyticsSkeleton } from '@/components/AnalyticsSkeleton'
+import { ArticleListSkeleton } from '@/components/ArticleListSkeleton'
 
 const AnalyticsDashboard = dynamic(() => import('@/components/AnalyticsDashboard'), {
   ssr: false,
@@ -547,15 +548,7 @@ export default function SecurityDashboard() {
               <TabsContent value={activeTab} className="mt-6">
                 <ScrollArea className="h-[600px] pr-4">
                   {loading && baseFilteredArticles.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center h-80">
-                      <motion.div
-                        animate={{ rotate: 360 }}
-                        transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
-                      >
-                        <RefreshCw className="h-16 w-16 text-slate-300" />
-                      </motion.div>
-                      <p className="mt-4 text-slate-500">Loading security intelligence...</p>
-                    </div>
+                    <ArticleListSkeleton />
                   ) : displayedArticles.length === 0 ? (
                     <motion.div
                       initial={{ opacity: 0, scale: 0.9 }}
