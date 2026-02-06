@@ -17,7 +17,6 @@ import {
   Activity,
   ChevronRight,
   Globe,
-  BarChart3,
   Target,
   AlertCircle,
 } from 'lucide-react'
@@ -34,6 +33,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import dynamic from 'next/dynamic'
 import { AnalyticsSkeleton } from '@/components/AnalyticsSkeleton'
 import { ArticleListSkeleton } from '@/components/ArticleListSkeleton'
+import type { AnalyticsData } from '@/components/AnalyticsDashboard'
 
 const AnalyticsDashboard = dynamic(() => import('@/components/AnalyticsDashboard'), {
   ssr: false,
@@ -138,6 +138,22 @@ function Computer(props: any) {
   )
 }
 
+const CVE_REGEX = /CVE-\d{4}-\d{4,}/gi;
+
+const escapeHtml = (unsafe: string) => {
+  return unsafe
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+const highlightCves = (text: string) => {
+  const escaped = escapeHtml(text);
+  return escaped.replace(CVE_REGEX, (match) => `<span class="bg-gradient-to-r from-amber-400 to-orange-400 text-white font-bold px-1.5 py-0.5 rounded text-xs">${match}</span>`)
+}
+
 export default function SecurityDashboard() {
   const [articles, setArticles] = useState<SecurityArticle[]>([])
   const [stats, setStats] = useState<Stats>({ totalArticles: 0, totalCves: 0, criticalCount: 0, highCount: 0 })
@@ -147,6 +163,10 @@ export default function SecurityDashboard() {
   const [sourceFilter, setSourceFilter] = useState<string>('all')
   const [lastUpdated, setLastUpdated] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState('all')
+
+  // Analytics state
+  const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null)
+  const [analyticsLoading, setAnalyticsLoading] = useState(false)
 
   const fetchArticles = async () => {
     setLoading(true)
@@ -166,6 +186,21 @@ export default function SecurityDashboard() {
       })
     } finally {
       setLoading(false)
+    }
+  }
+
+  const fetchAnalytics = async () => {
+    setAnalyticsLoading(true)
+    try {
+      const response = await fetch('/api/analytics')
+      const result = await response.json()
+      if (result.success) {
+        setAnalyticsData(result.data)
+      }
+    } catch (error) {
+      console.error('Failed to fetch analytics:', error)
+    } finally {
+      setAnalyticsLoading(false)
     }
   }
 
@@ -196,6 +231,12 @@ export default function SecurityDashboard() {
     fetchArticles()
   }, [])
 
+  useEffect(() => {
+    if (activeTab === 'analytics' && !analyticsData && !analyticsLoading) {
+      fetchAnalytics()
+    }
+  }, [activeTab, analyticsData, analyticsLoading])
+
   const baseFilteredArticles = useMemo(() => {
     let filtered = articles
 
@@ -219,21 +260,6 @@ export default function SecurityDashboard() {
 
     return filtered
   }, [articles, searchQuery, severityFilter, sourceFilter])
-
-  const escapeHtml = (unsafe: string) => {
-    return unsafe
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
-  }
-
-  const highlightCves = (text: string) => {
-    const escaped = escapeHtml(text);
-    const cveRegex = /CVE-\d{4}-\d{4,}/gi
-    return escaped.replace(cveRegex, (match) => `<span class="bg-gradient-to-r from-amber-400 to-orange-400 text-white font-bold px-1.5 py-0.5 rounded text-xs">${match}</span>`)
-  }
 
   const displayedArticles = useMemo(() => {
     let result = baseFilteredArticles
@@ -542,62 +568,63 @@ export default function SecurityDashboard() {
               </TabsList>
 
               <TabsContent value="analytics" className="mt-6">
-                <AnalyticsDashboard />
+                <AnalyticsDashboard data={analyticsData} loading={analyticsLoading} />
               </TabsContent>
 
-              <TabsContent value={activeTab} className="mt-6">
-                <ScrollArea className="h-[600px] pr-4">
-                  {loading && baseFilteredArticles.length === 0 ? (
-                    <ArticleListSkeleton />
-                  ) : displayedArticles.length === 0 ? (
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <Alert className="bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800">
-                        <Search className="h-4 w-4" />
-                        <div className="col-start-2">
-                          <AlertDescription className="text-slate-600 dark:text-slate-400 mb-4">
-                            {hasFilters
-                              ? "No articles match your current filters. Try adjusting them or clear all filters."
-                              : "No articles found. Click \"Scrape Now\" to fetch the latest security news."
-                            }
-                          </AlertDescription>
-                          <div className="flex flex-wrap gap-2">
-                            {hasFilters && (
-                              <Button variant="outline" size="sm" onClick={clearFilters}>
-                                Clear Filters
+              {activeTab !== 'analytics' && (
+                <TabsContent value={activeTab} className="mt-6">
+                  <ScrollArea className="h-[600px] pr-4">
+                    {loading && baseFilteredArticles.length === 0 ? (
+                      <ArticleListSkeleton />
+                    ) : displayedArticles.length === 0 ? (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <Alert className="bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800">
+                          <Search className="h-4 w-4" />
+                          <div className="col-start-2">
+                            <AlertDescription className="text-slate-600 dark:text-slate-400 mb-4">
+                              {hasFilters
+                                ? "No articles match your current filters. Try adjusting them or clear all filters."
+                                : "No articles found. Click \"Scrape Now\" to fetch the latest security news."
+                              }
+                            </AlertDescription>
+                            <div className="flex flex-wrap gap-2">
+                              {hasFilters && (
+                                <Button variant="outline" size="sm" onClick={clearFilters}>
+                                  Clear Filters
+                                </Button>
+                              )}
+                              <Button variant="default" size="sm" onClick={triggerScrape} disabled={loading}>
+                                {loading ? <RefreshCw className="mr-2 h-3 w-3 animate-spin" /> : <RefreshCw className="mr-2 h-3 w-3" />}
+                                Scrape Now
                               </Button>
-                            )}
-                            <Button variant="default" size="sm" onClick={triggerScrape} disabled={loading}>
-                              {loading ? <RefreshCw className="mr-2 h-3 w-3 animate-spin" /> : <RefreshCw className="mr-2 h-3 w-3" />}
-                              Scrape Now
-                            </Button>
+                            </div>
                           </div>
-                        </div>
-                      </Alert>
-                    </motion.div>
-                  ) : (
-                    <AnimatePresence mode="popLayout">
-                      <div className="space-y-4">
-                        {displayedArticles.map((article, index) => {
-                          const severityConfig = article.severityLevel ? SEVERITY_CONFIG[article.severityLevel as keyof typeof SEVERITY_CONFIG] : SEVERITY_CONFIG.LOW
-                          const sourceConfig = SOURCE_CONFIG[article.source as keyof typeof SOURCE_CONFIG] || SOURCE_CONFIG['hacker-news']
-                          const SeverityIcon = severityConfig.icon
-                          const SourceIcon = sourceConfig.icon
+                        </Alert>
+                      </motion.div>
+                    ) : (
+                      <AnimatePresence mode="popLayout">
+                        <div className="space-y-4">
+                          {displayedArticles.map((article, index) => {
+                            const severityConfig = article.severityLevel ? SEVERITY_CONFIG[article.severityLevel as keyof typeof SEVERITY_CONFIG] : SEVERITY_CONFIG.LOW
+                            const sourceConfig = SOURCE_CONFIG[article.source as keyof typeof SOURCE_CONFIG] || SOURCE_CONFIG['hacker-news']
+                            const SeverityIcon = severityConfig.icon
+                            const SourceIcon = sourceConfig.icon
 
-                          return (
-                            <motion.div
-                              key={article.id}
-                              initial={{ opacity: 0, y: 20 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              exit={{ opacity: 0, scale: 0.9 }}
-                              transition={{ duration: 0.3, delay: index * 0.05 }}
-                              layout
-                            >
-                              <Card
-                                className={`
+                            return (
+                              <motion.div
+                                key={article.id}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.9 }}
+                                transition={{ duration: 0.3, delay: index * 0.05 }}
+                                layout
+                              >
+                                <Card
+                                  className={`
                                   relative overflow-hidden
                                   bg-gradient-to-br ${article.severityLevel === 'CRITICAL' ? 'from-red-50/80 to-orange-50/80 dark:from-red-950/30 dark:to-orange-950/30' : 'from-white to-slate-50/80 dark:from-slate-900/80 dark:to-slate-800/50'}
                                   border ${severityConfig.border} hover:border-primary/50
@@ -605,148 +632,149 @@ export default function SecurityDashboard() {
                                   transition-all duration-300
                                   group
                                 `}
-                              >
-                                {article.severityLevel === 'CRITICAL' && (
-                                  <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-red-500 to-red-600" />
-                                )}
+                                >
+                                  {article.severityLevel === 'CRITICAL' && (
+                                    <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-red-500 to-red-600" />
+                                  )}
 
-                                <CardHeader className="pb-4">
-                                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
-                                    <div className="flex-1 min-w-0">
-                                      <div className="flex flex-wrap items-center gap-2 mb-3">
-                                        <Badge
-                                          variant="outline"
-                                          className={`
+                                  <CardHeader className="pb-4">
+                                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                                      <div className="flex-1 min-w-0">
+                                        <div className="flex flex-wrap items-center gap-2 mb-3">
+                                          <Badge
+                                            variant="outline"
+                                            className={`
                                             bg-gradient-to-r ${sourceConfig.gradient}
                                             ${sourceConfig.border} ${sourceConfig.text}
                                             border px-3 py-1 gap-1.5 font-medium
                                           `}
-                                        >
-                                          <SourceIcon className="h-3 w-3" />
-                                          {article.sourceName}
-                                        </Badge>
+                                          >
+                                            <SourceIcon className="h-3 w-3" />
+                                            {article.sourceName}
+                                          </Badge>
 
-                                        {article.severityLevel && (
-                                          <Badge
-                                            className={`
+                                          {article.severityLevel && (
+                                            <Badge
+                                              className={`
                                               bg-gradient-to-r ${severityConfig.gradient}
                                               text-white px-3 py-1 gap-1.5 font-medium shadow-md
                                             `}
-                                          >
-                                            <SeverityIcon className="h-3 w-3" />
-                                            {article.severityLevel}
-                                          </Badge>
-                                        )}
+                                            >
+                                              <SeverityIcon className="h-3 w-3" />
+                                              {article.severityLevel}
+                                            </Badge>
+                                          )}
 
-                                        <span className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1">
-                                          <Clock className="h-3 w-3" />
-                                          {new Date(article.publishedAt).toLocaleDateString()} at{' '}
-                                          {new Date(article.publishedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                        </span>
+                                          <span className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                                            <Clock className="h-3 w-3" />
+                                            {new Date(article.publishedAt).toLocaleDateString()} at{' '}
+                                            {new Date(article.publishedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                          </span>
+                                        </div>
+
+                                        <CardTitle className="text-lg sm:text-xl leading-snug">
+                                          <a
+                                            href={article.url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="hover:text-primary transition-colors flex items-start gap-2 group/link"
+                                          >
+                                            <span
+                                              className="line-clamp-2"
+                                              dangerouslySetInnerHTML={{ __html: highlightCves(article.title) }}
+                                            />
+                                            <ExternalLink className="h-4 w-4 text-slate-400 group-hover/link:text-primary flex-shrink-0 mt-1 transition-colors" />
+                                          </a>
+                                        </CardTitle>
                                       </div>
 
-                                      <CardTitle className="text-lg sm:text-xl leading-snug">
-                                        <a
-                                          href={article.url}
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                          className="hover:text-primary transition-colors flex items-start gap-2 group/link"
-                                        >
-                                          <span
-                                            className="line-clamp-2"
-                                            dangerouslySetInnerHTML={{ __html: highlightCves(article.title) }}
-                                          />
-                                          <ExternalLink className="h-4 w-4 text-slate-400 group-hover/link:text-primary flex-shrink-0 mt-1 transition-colors" />
-                                        </a>
-                                      </CardTitle>
-                                    </div>
-
-                                    {article.severityScore && (
-                                      <div className={`
+                                      {article.severityScore && (
+                                        <div className={`
                                         flex-shrink-0 bg-gradient-to-br ${severityConfig.bg}
                                         border ${severityConfig.border}
                                         rounded-lg p-3 text-center min-w-[70px]
                                       `}>
-                                        <div className={`text-2xl font-bold ${severityConfig.text}`}>
-                                          {article.severityScore.toFixed(1)}
+                                          <div className={`text-2xl font-bold ${severityConfig.text}`}>
+                                            {article.severityScore.toFixed(1)}
+                                          </div>
+                                          <div className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wide">
+                                            Score
+                                          </div>
                                         </div>
-                                        <div className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wide">
-                                          Score
-                                        </div>
-                                      </div>
+                                      )}
+                                    </div>
+                                  </CardHeader>
+
+                                  <CardContent className="pt-0 space-y-4">
+                                    {article.summary && (
+                                      <p
+                                        className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed"
+                                        dangerouslySetInnerHTML={{ __html: highlightCves(article.summary) }}
+                                      />
                                     )}
-                                  </div>
-                                </CardHeader>
 
-                                <CardContent className="pt-0 space-y-4">
-                                  {article.summary && (
-                                    <p
-                                      className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed"
-                                      dangerouslySetInnerHTML={{ __html: highlightCves(article.summary) }}
-                                    />
-                                  )}
-
-                                  {article.cves.length > 0 && (
-                                    <div className="flex flex-wrap gap-2">
-                                      {article.cves.map((cve) => (
-                                        <motion.a
-                                          key={cve.id}
-                                          href={`https://cve.mitre.org/cgi-bin/cvename.cgi?name=${cve.cveId}`}
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                          className="group/cve"
-                                          whileHover={{ scale: 1.05 }}
-                                          whileTap={{ scale: 0.95 }}
-                                        >
-                                          <Badge
-                                            variant="outline"
-                                            className={`
+                                    {article.cves.length > 0 && (
+                                      <div className="flex flex-wrap gap-2">
+                                        {article.cves.map((cve) => (
+                                          <motion.a
+                                            key={cve.id}
+                                            href={`https://cve.mitre.org/cgi-bin/cvename.cgi?name=${cve.cveId}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="group/cve"
+                                            whileHover={{ scale: 1.05 }}
+                                            whileTap={{ scale: 0.95 }}
+                                          >
+                                            <Badge
+                                              variant="outline"
+                                              className={`
                                               bg-slate-50 dark:bg-slate-800/50
                                               border-slate-200 dark:border-slate-700
                                               text-slate-700 dark:text-slate-300
                                               px-3 py-1.5 gap-2 hover:border-primary hover:text-primary
                                               transition-all cursor-pointer
                                             `}
-                                          >
-                                            {cve.cveId}
-                                            {cve.cvssScore && (
-                                              <span className="bg-gradient-to-r from-red-500/20 to-orange-500/20 text-red-600 px-1.5 py-0.5 rounded text-xs font-semibold">
-                                                CVSS: {cve.cvssScore}
-                                              </span>
-                                            )}
-                                          </Badge>
-                                        </motion.a>
-                                      ))}
-                                    </div>
-                                  )}
-
-                                  <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800/50">
-                                    <a
-                                      href={article.url}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="inline-flex items-center gap-2 text-sm text-primary hover:text-primary/80 font-medium transition-colors group/link"
-                                    >
-                                      Read Full Article
-                                      <ChevronRight className="h-4 w-4 group-hover/link:translate-x-1 transition-transform" />
-                                    </a>
-                                    {article.cves.length > 0 && (
-                                      <span className="text-xs text-slate-500 dark:text-slate-500 flex items-center gap-1">
-                                        <Target className="h-3 w-3" />
-                                        {article.cves.length} CVE{article.cves.length > 1 ? 's' : ''} detected
-                                      </span>
+                                            >
+                                              {cve.cveId}
+                                              {cve.cvssScore && (
+                                                <span className="bg-gradient-to-r from-red-500/20 to-orange-500/20 text-red-600 px-1.5 py-0.5 rounded text-xs font-semibold">
+                                                  CVSS: {cve.cvssScore}
+                                                </span>
+                                              )}
+                                            </Badge>
+                                          </motion.a>
+                                        ))}
+                                      </div>
                                     )}
-                                  </div>
-                                </CardContent>
-                              </Card>
-                            </motion.div>
-                          )
-                        })}
-                      </div>
-                    </AnimatePresence>
-                  )}
-                </ScrollArea>
-              </TabsContent>
+
+                                    <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800/50">
+                                      <a
+                                        href={article.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center gap-2 text-sm text-primary hover:text-primary/80 font-medium transition-colors group/link"
+                                      >
+                                        Read Full Article
+                                        <ChevronRight className="h-4 w-4 group-hover/link:translate-x-1 transition-transform" />
+                                      </a>
+                                      {article.cves.length > 0 && (
+                                        <span className="text-xs text-slate-500 dark:text-slate-500 flex items-center gap-1">
+                                          <Target className="h-3 w-3" />
+                                          {article.cves.length} CVE{article.cves.length > 1 ? 's' : ''} detected
+                                        </span>
+                                      )}
+                                    </div>
+                                  </CardContent>
+                                </Card>
+                              </motion.div>
+                            )
+                          })}
+                        </div>
+                      </AnimatePresence>
+                    )}
+                  </ScrollArea>
+                </TabsContent>
+              )}
             </Tabs>
           </motion.div>
         </main>
