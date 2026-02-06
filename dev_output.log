@@ -1,0 +1,39 @@
+
+> nextjs_tailwind_shadcn_ts@0.1.0 dev
+> next dev -p 3008 2>&1 | tee dev.log
+
+   ▲ Next.js 15.3.8
+   - Local:        http://localhost:3008
+   - Network:      http://192.168.0.2:3008
+
+ ✓ Starting...
+ ✓ Ready in 2.4s
+ ○ Compiling / ...
+ ✓ Compiled / in 5.2s (2760 modules)
+ GET / 200 in 6078ms
+ ○ Compiling /api/articles ...
+ ✓ Compiled /api/analytics in 7.1s (2795 modules)
+prisma:query SELECT `main`.`SecurityArticle`.`id`, `main`.`SecurityArticle`.`url`, `main`.`SecurityArticle`.`title`, `main`.`SecurityArticle`.`summary`, `main`.`SecurityArticle`.`source`, `main`.`SecurityArticle`.`sourceName`, `main`.`SecurityArticle`.`publishedAt`, `main`.`SecurityArticle`.`scrapedAt`, `main`.`SecurityArticle`.`severityScore`, `main`.`SecurityArticle`.`severityLevel` FROM `main`.`SecurityArticle` WHERE 1=1 ORDER BY `main`.`SecurityArticle`.`publishedAt` DESC LIMIT ? OFFSET ?
+prisma:query SELECT `main`.`_CveToSecurityArticle`.`B`, `main`.`_CveToSecurityArticle`.`A` FROM `main`.`_CveToSecurityArticle` WHERE `main`.`_CveToSecurityArticle`.`B` IN (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+prisma:query SELECT `main`.`Cve`.`id`, `main`.`Cve`.`cveId`, `main`.`Cve`.`cvssScore`, `main`.`Cve`.`severity`, `main`.`Cve`.`affectedSoftware` FROM `main`.`Cve` WHERE `main`.`Cve`.`id` IN (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) LIMIT ? OFFSET ?
+prisma:query SELECT COUNT(`main`.`SecurityArticle`.`id`) AS `_count$id`, `main`.`SecurityArticle`.`severityLevel` FROM `main`.`SecurityArticle` WHERE `main`.`SecurityArticle`.`severityLevel` IS NOT NULL GROUP BY `main`.`SecurityArticle`.`severityLevel` LIMIT ? OFFSET ?
+prisma:query SELECT COUNT(`main`.`SecurityArticle`.`id`) AS `_count$id`, `main`.`SecurityArticle`.`source` FROM `main`.`SecurityArticle` WHERE 1=1 GROUP BY `main`.`SecurityArticle`.`source` LIMIT ? OFFSET ?
+prisma:query SELECT `main`.`Cve`.`id`, `main`.`Cve`.`cveId`, `main`.`Cve`.`cvssScore`, `main`.`Cve`.`severity`, COALESCE(`aggr_selection_0_SecurityArticle`.`_aggr_count_articles`, 0) AS `_aggr_count_articles` FROM `main`.`Cve` LEFT JOIN (SELECT `main`.`_CveToSecurityArticle`.`A`, COUNT(`main`.`_CveToSecurityArticle`.`A`) AS `orderby_aggregator` FROM `main`.`SecurityArticle` LEFT JOIN `main`.`_CveToSecurityArticle` ON (`main`.`SecurityArticle`.`id` = `main`.`_CveToSecurityArticle`.`B`) WHERE 1=1 GROUP BY `main`.`_CveToSecurityArticle`.`A`) AS `orderby_1_SecurityArticle` ON (`main`.`Cve`.`id` = `orderby_1_SecurityArticle`.`A`) LEFT JOIN (SELECT `main`.`_CveToSecurityArticle`.`A`, COUNT(`main`.`_CveToSecurityArticle`.`A`) AS `_aggr_count_articles` FROM `main`.`SecurityArticle` LEFT JOIN `main`.`_CveToSecurityArticle` ON (`main`.`SecurityArticle`.`id` = `main`.`_CveToSecurityArticle`.`B`) WHERE 1=1 GROUP BY `main`.`_CveToSecurityArticle`.`A`) AS `aggr_selection_0_SecurityArticle` ON (`main`.`Cve`.`id` = `aggr_selection_0_SecurityArticle`.`A`) WHERE 1=1 ORDER BY COALESCE(`orderby_1_SecurityArticle`.`orderby_aggregator`, ?) DESC LIMIT ? OFFSET ?
+prisma:query SELECT COUNT(*) AS `_count$_all` FROM (SELECT `main`.`SecurityArticle`.`id` FROM `main`.`SecurityArticle` WHERE 1=1 LIMIT ? OFFSET ?) AS `sub`
+prisma:query SELECT COUNT(*) AS `_count$_all` FROM (SELECT `main`.`SecurityArticle`.`id` FROM `main`.`SecurityArticle` WHERE `main`.`SecurityArticle`.`severityLevel` = ? LIMIT ? OFFSET ?) AS `sub`
+prisma:query SELECT COUNT(*) AS `_count$_all` FROM (SELECT `main`.`Cve`.`id` FROM `main`.`Cve` WHERE 1=1 LIMIT ? OFFSET ?) AS `sub`
+prisma:query SELECT COUNT(*) AS `_count$_all` FROM (SELECT `main`.`SecurityArticle`.`id` FROM `main`.`SecurityArticle` WHERE `main`.`SecurityArticle`.`severityLevel` = ? LIMIT ? OFFSET ?) AS `sub`
+prisma:query SELECT COUNT(*) AS `_count$_all` FROM (SELECT `main`.`SecurityArticle`.`id` FROM `main`.`SecurityArticle` WHERE 1=1 LIMIT ? OFFSET ?) AS `sub`
+ GET / 200 in 772ms
+prisma:query SELECT 1
+prisma:query SELECT `main`.`SecurityArticle`.`id`, `main`.`SecurityArticle`.`url`, `main`.`SecurityArticle`.`title`, `main`.`SecurityArticle`.`summary`, `main`.`SecurityArticle`.`source`, `main`.`SecurityArticle`.`sourceName`, `main`.`SecurityArticle`.`publishedAt`, `main`.`SecurityArticle`.`scrapedAt`, `main`.`SecurityArticle`.`severityScore`, `main`.`SecurityArticle`.`severityLevel` FROM `main`.`SecurityArticle` WHERE 1=1 ORDER BY `main`.`SecurityArticle`.`publishedAt` DESC LIMIT ? OFFSET ?
+prisma:query SELECT `main`.`_CveToSecurityArticle`.`B`, `main`.`_CveToSecurityArticle`.`A` FROM `main`.`_CveToSecurityArticle` WHERE `main`.`_CveToSecurityArticle`.`B` IN (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+prisma:query SELECT `main`.`Cve`.`id`, `main`.`Cve`.`cveId`, `main`.`Cve`.`cvssScore`, `main`.`Cve`.`severity`, `main`.`Cve`.`affectedSoftware` FROM `main`.`Cve` WHERE `main`.`Cve`.`id` IN (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) LIMIT ? OFFSET ?
+prisma:query SELECT COUNT(*) AS `_count$_all` FROM (SELECT `main`.`SecurityArticle`.`id` FROM `main`.`SecurityArticle` WHERE 1=1 LIMIT ? OFFSET ?) AS `sub`
+ GET /api/articles 200 in 77ms
+prisma:query SELECT COUNT(`main`.`SecurityArticle`.`id`) AS `_count$id`, `main`.`SecurityArticle`.`source` FROM `main`.`SecurityArticle` WHERE 1=1 GROUP BY `main`.`SecurityArticle`.`source` LIMIT ? OFFSET ?
+prisma:query SELECT 1
+prisma:query SELECT `main`.`Cve`.`id`, `main`.`Cve`.`cveId`, `main`.`Cve`.`cvssScore`, `main`.`Cve`.`severity`, COALESCE(`aggr_selection_0_SecurityArticle`.`_aggr_count_articles`, 0) AS `_aggr_count_articles` FROM `main`.`Cve` LEFT JOIN (SELECT `main`.`_CveToSecurityArticle`.`A`, COUNT(`main`.`_CveToSecurityArticle`.`A`) AS `orderby_aggregator` FROM `main`.`SecurityArticle` LEFT JOIN `main`.`_CveToSecurityArticle` ON (`main`.`SecurityArticle`.`id` = `main`.`_CveToSecurityArticle`.`B`) WHERE 1=1 GROUP BY `main`.`_CveToSecurityArticle`.`A`) AS `orderby_1_SecurityArticle` ON (`main`.`Cve`.`id` = `orderby_1_SecurityArticle`.`A`) LEFT JOIN (SELECT `main`.`_CveToSecurityArticle`.`A`, COUNT(`main`.`_CveToSecurityArticle`.`A`) AS `_aggr_count_articles` FROM `main`.`SecurityArticle` LEFT JOIN `main`.`_CveToSecurityArticle` ON (`main`.`SecurityArticle`.`id` = `main`.`_CveToSecurityArticle`.`B`) WHERE 1=1 GROUP BY `main`.`_CveToSecurityArticle`.`A`) AS `aggr_selection_0_SecurityArticle` ON (`main`.`Cve`.`id` = `aggr_selection_0_SecurityArticle`.`A`) WHERE 1=1 ORDER BY COALESCE(`orderby_1_SecurityArticle`.`orderby_aggregator`, ?) DESC LIMIT ? OFFSET ?
+prisma:query SELECT COUNT(`main`.`SecurityArticle`.`id`) AS `_count$id`, `main`.`SecurityArticle`.`severityLevel` FROM `main`.`SecurityArticle` WHERE `main`.`SecurityArticle`.`severityLevel` IS NOT NULL GROUP BY `main`.`SecurityArticle`.`severityLevel` LIMIT ? OFFSET ?
+ GET /api/analytics 200 in 43ms
+[?25h

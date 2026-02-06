@@ -1,15 +1,19 @@
 'use client'
 
-import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
-import { TrendingUp, Shield, Globe, Target } from 'lucide-react'
+import { Shield, Globe, Target } from 'lucide-react'
 import { AnalyticsSkeleton } from '@/components/AnalyticsSkeleton'
 
-interface AnalyticsData {
+export interface AnalyticsData {
   severityDistribution: { severity: string; count: number }[]
   sourceDistribution: { source: string; count: number }[]
   topCves: { cveId: string; articleCount: number; cvssScore?: number; severity?: string }[]
+}
+
+interface AnalyticsDashboardProps {
+  data: AnalyticsData | null
+  loading: boolean
 }
 
 const SEVERITY_COLORS = {
@@ -20,30 +24,7 @@ const SEVERITY_COLORS = {
   UNKNOWN: '#6b7280'
 }
 
-const SOURCE_COLORS = ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444']
-
-export default function AnalyticsDashboard() {
-  const [data, setData] = useState<AnalyticsData | null>(null)
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    fetchAnalytics()
-  }, [])
-
-  const fetchAnalytics = async () => {
-    try {
-      const response = await fetch('/api/analytics')
-      const result = await response.json()
-      if (result.success) {
-        setData(result.data)
-      }
-    } catch (error) {
-      console.error('Failed to fetch analytics:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
+export default function AnalyticsDashboard({ data, loading }: AnalyticsDashboardProps) {
   if (loading) {
     return <AnalyticsSkeleton />
   }
