@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { unstable_cache } from 'next/cache'
 import { db } from '@/lib/db'
+import { validatePagination } from '@/lib/pagination'
 
 // Cache dashboard statistics to reduce DB load
 // Revalidates every 60 seconds or when manually invalidated
@@ -33,8 +34,10 @@ export async function GET(request: NextRequest) {
     const severity = searchParams.get('severity')
     const source = searchParams.get('source')
     const search = searchParams.get('search')
-    const limit = parseInt(searchParams.get('limit') || '100')
-    const offset = parseInt(searchParams.get('offset') || '0')
+    const { limit, offset } = validatePagination(
+      searchParams.get('limit'),
+      searchParams.get('offset')
+    )
 
     // Build where clause
     const where: any = {}
