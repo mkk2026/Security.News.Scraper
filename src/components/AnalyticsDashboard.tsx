@@ -3,8 +3,10 @@
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
-import { TrendingUp, Shield, Globe, Target } from 'lucide-react'
+import { TrendingUp, Shield, Globe, Target, AlertCircle, RefreshCw, BarChart3 } from 'lucide-react'
 import { AnalyticsSkeleton } from '@/components/AnalyticsSkeleton'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
 
 interface AnalyticsData {
   severityDistribution: { severity: string; count: number }[]
@@ -25,20 +27,29 @@ const SOURCE_COLORS = ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444']
 export default function AnalyticsDashboard() {
   const [data, setData] = useState<AnalyticsData | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     fetchAnalytics()
   }, [])
 
   const fetchAnalytics = async () => {
+    setLoading(true)
+    setError(null)
     try {
       const response = await fetch('/api/analytics')
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
       const result = await response.json()
       if (result.success) {
         setData(result.data)
+      } else {
+        setError(result.error || 'Failed to load analytics data')
       }
     } catch (error) {
       console.error('Failed to fetch analytics:', error)
+      setError('Failed to connect to analytics service. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -48,8 +59,42 @@ export default function AnalyticsDashboard() {
     return <AnalyticsSkeleton />
   }
 
-  if (!data) {
-    return <div className="text-center text-slate-500">No analytics data available</div>
+  if (error) {
+    return (
+      <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle>Error Loading Analytics</AlertTitle>
+        <AlertDescription className="flex flex-col gap-3 mt-2">
+          <p>{error}</p>
+          <Button variant="outline" size="sm" onClick={fetchAnalytics} className="w-fit">
+            <RefreshCw className="mr-2 h-4 w-4" />
+            Retry
+          </Button>
+        </AlertDescription>
+      </Alert>
+    )
+  }
+
+  const hasData = data && (
+    data.severityDistribution.length > 0 ||
+    data.sourceDistribution.length > 0 ||
+    data.topCves.length > 0
+  )
+
+  if (!hasData) {
+    return (
+      <div className="flex flex-col items-center justify-center p-8 text-center bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-dashed border-slate-300 dark:border-slate-700">
+        <BarChart3 className="h-12 w-12 text-slate-300 mb-4" />
+        <h3 className="text-lg font-medium text-slate-900 dark:text-slate-100">No Analytics Available</h3>
+        <p className="text-sm text-slate-500 max-w-sm mb-4">
+          We haven't collected enough data to generate analytics yet. Check back later or try refreshing.
+        </p>
+        <Button variant="outline" onClick={fetchAnalytics}>
+          <RefreshCw className="mr-2 h-4 w-4" />
+          Refresh Data
+        </Button>
+      </div>
+    )
   }
 
   return (
