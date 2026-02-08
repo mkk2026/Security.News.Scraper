@@ -1,5 +1,5 @@
 import { db } from '@/lib/db'
-import { isSafeUrl } from '@/lib/security'
+import { isSafeUrlAsync } from '@/lib/security'
 
 export interface NotificationConfig {
   type: 'email' | 'webhook'
@@ -143,7 +143,8 @@ async function sendWebhookNotification(
     return false
   }
 
-  if (!isSafeUrl(webhookUrl)) {
+  const isSafe = await isSafeUrlAsync(webhookUrl)
+  if (!isSafe) {
     console.error('Security Warning: Blocked unsafe webhook URL (SSRF protection):', webhookUrl)
     return false
   }
@@ -239,7 +240,8 @@ export async function createNotificationConfig(
 ): Promise<void> {
   try {
     if (config.type === 'webhook' && config.config?.url) {
-      if (!isSafeUrl(config.config.url)) {
+      const isSafe = await isSafeUrlAsync(config.config.url)
+      if (!isSafe) {
         throw new Error('Invalid or unsafe webhook URL')
       }
     }
