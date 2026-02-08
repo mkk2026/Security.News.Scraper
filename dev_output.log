@@ -1,0 +1,26 @@
+$ next dev -p 3008 2>&1 | tee dev.log
+   ▲ Next.js 15.3.8
+   - Local:        http://localhost:3008
+   - Network:      http://192.168.0.2:3008
+   - Environments: .env
+
+ ✓ Starting...
+ ✓ Ready in 2.1s
+ ○ Compiling / ...
+ ✓ Compiled / in 6.8s (2778 modules)
+ GET / 200 in 7625ms
+ ○ Compiling /api/articles ...
+ ✓ Compiled /api/articles in 1982ms (2812 modules)
+prisma:query SELECT `main`.`SecurityArticle`.`id`, `main`.`SecurityArticle`.`url`, `main`.`SecurityArticle`.`title`, `main`.`SecurityArticle`.`summary`, `main`.`SecurityArticle`.`source`, `main`.`SecurityArticle`.`sourceName`, `main`.`SecurityArticle`.`publishedAt`, `main`.`SecurityArticle`.`scrapedAt`, `main`.`SecurityArticle`.`severityScore`, `main`.`SecurityArticle`.`severityLevel` FROM `main`.`SecurityArticle` WHERE 1=1 ORDER BY `main`.`SecurityArticle`.`publishedAt` DESC LIMIT ? OFFSET ?
+prisma:query SELECT `main`.`_CveToSecurityArticle`.`B`, `main`.`_CveToSecurityArticle`.`A` FROM `main`.`_CveToSecurityArticle` WHERE `main`.`_CveToSecurityArticle`.`B` IN (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+prisma:query SELECT `main`.`Cve`.`id`, `main`.`Cve`.`cveId`, `main`.`Cve`.`cvssScore`, `main`.`Cve`.`severity`, `main`.`Cve`.`affectedSoftware` FROM `main`.`Cve` WHERE `main`.`Cve`.`id` IN (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) LIMIT ? OFFSET ?
+prisma:query SELECT COUNT(*) AS `_count$_all` FROM (SELECT `main`.`SecurityArticle`.`id` FROM `main`.`SecurityArticle` WHERE `main`.`SecurityArticle`.`severityLevel` = ? LIMIT ? OFFSET ?) AS `sub`
+prisma:query SELECT COUNT(*) AS `_count$_all` FROM (SELECT `main`.`Cve`.`id` FROM `main`.`Cve` WHERE 1=1 LIMIT ? OFFSET ?) AS `sub`
+prisma:query SELECT COUNT(*) AS `_count$_all` FROM (SELECT `main`.`SecurityArticle`.`id` FROM `main`.`SecurityArticle` WHERE 1=1 LIMIT ? OFFSET ?) AS `sub`
+prisma:query SELECT COUNT(*) AS `_count$_all` FROM (SELECT `main`.`SecurityArticle`.`id` FROM `main`.`SecurityArticle` WHERE `main`.`SecurityArticle`.`severityLevel` = ? LIMIT ? OFFSET ?) AS `sub`
+ GET /api/articles 200 in 2279ms
+prisma:query SELECT COUNT(*) AS `_count$_all` FROM (SELECT `main`.`SecurityArticle`.`id` FROM `main`.`SecurityArticle` WHERE 1=1 LIMIT ? OFFSET ?) AS `sub`
+ GET / 200 in 281ms
+ ✓ Compiled in 711ms (1377 modules)
+error: script "dev" was terminated by signal SIGTERM (Polite quit request)
+[?25h

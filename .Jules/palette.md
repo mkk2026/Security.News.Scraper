@@ -15,3 +15,7 @@
 ## 2026-02-05 - Skeleton Loading States
 **Learning:** Replacing text-based loading states (e.g., "Loading analytics...") with layout-mimicking skeletons significantly improves perceived performance and visual continuity.
 **Action:** When implementing dashboards or data-heavy views, always create a corresponding `<ComponentSkeleton />` that matches the component's layout structure.
+
+## 2026-02-08 - Number Animation Stability
+**Learning:** Animating numbers without monospaced fonts causes jitter as character widths change.
+**Action:** Always use `tabular-nums` (Tailwind) or `font-variant-numeric: tabular-nums` when animating numerical values to keep the layout stable.

@@ -34,6 +34,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import dynamic from 'next/dynamic'
 import { AnalyticsSkeleton } from '@/components/AnalyticsSkeleton'
 import { ArticleListSkeleton } from '@/components/ArticleListSkeleton'
+import { CountUp } from '@/components/ui/count-up'
 
 const AnalyticsDashboard = dynamic(() => import('@/components/AnalyticsDashboard'), {
   ssr: false,
@@ -333,7 +334,9 @@ export default function SecurityDashboard() {
                 <CardContent>
                   <div className="flex items-end justify-between">
                     <div>
-                      <div className="text-3xl font-bold text-slate-900 dark:text-white">{stats.totalArticles}</div>
+                      <div className="text-3xl font-bold text-slate-900 dark:text-white">
+                        <CountUp value={stats.totalArticles} />
+                      </div>
                       <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Security news articles</p>
                     </div>
                     <div className="bg-blue-500/10 text-blue-600 text-xs px-2 py-1 rounded-full font-medium">
@@ -364,7 +367,9 @@ export default function SecurityDashboard() {
                 <CardContent>
                   <div className="flex items-end justify-between">
                     <div>
-                      <div className="text-3xl font-bold text-slate-900 dark:text-white">{stats.totalCves}</div>
+                      <div className="text-3xl font-bold text-slate-900 dark:text-white">
+                        <CountUp value={stats.totalCves} />
+                      </div>
                       <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Vulnerabilities tracked</p>
                     </div>
                     <div className="bg-purple-500/10 text-purple-600 text-xs px-2 py-1 rounded-full font-medium">
@@ -396,7 +401,9 @@ export default function SecurityDashboard() {
                 <CardContent>
                   <div className="flex items-end justify-between">
                     <div>
-                      <div className="text-3xl font-bold text-red-600">{stats.criticalCount}</div>
+                      <div className="text-3xl font-bold text-red-600">
+                        <CountUp value={stats.criticalCount} />
+                      </div>
                       <p className="text-xs text-red-500/70 mt-1">Urgent action required</p>
                     </div>
                     <div className="bg-red-500 text-white text-xs px-2 py-1 rounded-full font-medium animate-pulse">
@@ -428,7 +435,9 @@ export default function SecurityDashboard() {
                 <CardContent>
                   <div className="flex items-end justify-between">
                     <div>
-                      <div className="text-3xl font-bold text-orange-600">{stats.highCount}</div>
+                      <div className="text-3xl font-bold text-orange-600">
+                        <CountUp value={stats.highCount} />
+                      </div>
                       <p className="text-xs text-orange-500/70 mt-1">Elevated severity</p>
                     </div>
                     <div className="bg-orange-500/20 text-orange-600 text-xs px-2 py-1 rounded-full font-medium">
