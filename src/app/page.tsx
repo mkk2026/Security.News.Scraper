@@ -34,6 +34,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import dynamic from 'next/dynamic'
 import { AnalyticsSkeleton } from '@/components/AnalyticsSkeleton'
 import { ArticleListSkeleton } from '@/components/ArticleListSkeleton'
+import { escapeHtml } from '@/lib/text-utils'
 
 const AnalyticsDashboard = dynamic(() => import('@/components/AnalyticsDashboard'), {
   ssr: false,
@@ -138,6 +139,13 @@ function Computer(props: any) {
   )
 }
 
+const CVE_REGEX = /CVE-\d{4}-\d{4,}/gi
+
+const highlightCves = (text: string) => {
+  const escaped = escapeHtml(text);
+  return escaped.replace(CVE_REGEX, (match) => `<span class="bg-gradient-to-r from-amber-400 to-orange-400 text-white font-bold px-1.5 py-0.5 rounded text-xs">${match}</span>`)
+}
+
 export default function SecurityDashboard() {
   const [articles, setArticles] = useState<SecurityArticle[]>([])
   const [stats, setStats] = useState<Stats>({ totalArticles: 0, totalCves: 0, criticalCount: 0, highCount: 0 })
@@ -219,21 +227,6 @@ export default function SecurityDashboard() {
 
     return filtered
   }, [articles, searchQuery, severityFilter, sourceFilter])
-
-  const escapeHtml = (unsafe: string) => {
-    return unsafe
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
-  }
-
-  const highlightCves = (text: string) => {
-    const escaped = escapeHtml(text);
-    const cveRegex = /CVE-\d{4}-\d{4,}/gi
-    return escaped.replace(cveRegex, (match) => `<span class="bg-gradient-to-r from-amber-400 to-orange-400 text-white font-bold px-1.5 py-0.5 rounded text-xs">${match}</span>`)
-  }
 
   const displayedArticles = useMemo(() => {
     let result = baseFilteredArticles

@@ -15,3 +15,7 @@
 ## 2025-02-19 - [Array State Mutation]
 **Learning:** The sorting function `articles.sort()` sorts in place. When called on a state array (even if aliased), it mutated the underlying state directly, bypassing React's update lifecycle and potentially causing inconsistent UI behavior.
 **Action:** Always create a shallow copy before sorting state arrays: `[...articles].sort(...)`.
+
+## 2025-02-21 - [Regex Compilation in Render]
+**Learning:** `highlightCves` and `escapeHtml` were defined inside the `SecurityDashboard` component, causing regex recompilation and function recreation on every render.
+**Action:** Move static utility functions and regex constants outside the component scope to ensure they are compiled once and reused.
