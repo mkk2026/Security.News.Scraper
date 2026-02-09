@@ -15,3 +15,7 @@
 ## 2026-02-05 - Skeleton Loading States
 **Learning:** Replacing text-based loading states (e.g., "Loading analytics...") with layout-mimicking skeletons significantly improves perceived performance and visual continuity.
 **Action:** When implementing dashboards or data-heavy views, always create a corresponding `<ComponentSkeleton />` that matches the component's layout structure.
+
+## 2026-10-25 - Context for External Links & Focus Styles
+**Learning:** Links opening in new tabs (`target="_blank"`) lack context for screen readers, and custom components often miss focus styles.
+**Action:** Add `<span className="sr-only">(opens in new tab)</span>` inside the link and ensure `focus-visible` styles are applied, especially when `outline` is removed.
