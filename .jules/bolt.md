@@ -15,3 +15,7 @@
 ## 2025-02-19 - [Array State Mutation]
 **Learning:** The sorting function `articles.sort()` sorts in place. When called on a state array (even if aliased), it mutated the underlying state directly, bypassing React's update lifecycle and potentially causing inconsistent UI behavior.
 **Action:** Always create a shallow copy before sorting state arrays: `[...articles].sort(...)`.
+
+## 2025-02-21 - [Batch Data Ingestion]
+**Learning:** The scraping service was performing `findUnique` and `findMany` queries inside a loop for every scraped article to check for existence and duplicates. This created an N+1 query problem, scaling linearly with the number of articles.
+**Action:** Batch fetch existing records (using `where: { url: { in: [...] } }`) and a single window of recent articles *before* the loop. Perform existence and duplicate checks in-memory against these collections.

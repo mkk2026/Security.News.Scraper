@@ -30,29 +30,37 @@ export async function POST(request: NextRequest) {
 
     console.log(`Processing ${scrapedArticles.length} scraped articles...`)
 
+    // Optimized: Batch fetch existing URLs to avoid N+1 queries
+    const scrapedUrls = scrapedArticles.map(a => a.url)
+    const existingArticles = await db.securityArticle.findMany({
+      where: { url: { in: scrapedUrls } },
+      select: { url: true }
+    })
+    const existingUrls = new Set(existingArticles.map(a => a.url))
+
+    // Optimized: Fetch recent articles once for duplicate checking
+    const recentArticles = await db.securityArticle.findMany({
+      take: 100,
+      orderBy: { publishedAt: 'desc' },
+      select: { title: true, summary: true }
+    })
+
+    // Create a mutable copy for in-memory updates during the loop
+    const potentialDuplicates = [...recentArticles]
+
     let newArticlesCount = 0
     let newCvesCount = 0
 
     // Process each scraped article
     for (const scraped of scrapedArticles) {
       try {
-        // Check for duplicates by URL
-        const existingArticle = await db.securityArticle.findUnique({
-          where: { url: scraped.url },
-          include: { cves: true },
-        })
-
-        if (existingArticle) {
+        // Check for duplicates by URL (in-memory check)
+        if (existingUrls.has(scraped.url)) {
           console.log(`Article already exists: ${scraped.title}`)
           continue
         }
 
-        // Check for content duplicates (similar articles from different sources)
-        const potentialDuplicates = await db.securityArticle.findMany({
-          take: 10,
-          orderBy: { publishedAt: 'desc' },
-        })
-
+        // Check for content duplicates (in-memory check)
         const isDuplicate = potentialDuplicates.some(existing =>
           isDuplicateArticle(
             existing.title,
@@ -88,6 +96,9 @@ export async function POST(request: NextRequest) {
             contentHash,
           },
         })
+
+        // Add to in-memory duplicate check list for subsequent items in this batch
+        potentialDuplicates.unshift({ title: article.title, summary: article.summary })
 
         console.log(`Created article: ${article.title}`)
 
