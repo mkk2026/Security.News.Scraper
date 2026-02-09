@@ -1,3 +1,5 @@
+import { lookup } from 'node:dns/promises';
+
 /**
  * Security utilities for the application.
  */
@@ -38,6 +40,48 @@ export function isPrivateIP(ip: string): boolean {
 }
 
 /**
+ * Checks if an IPv6 address is private or reserved.
+ * Blocks:
+ * - ::1 (Loopback)
+ * - fc00::/7 (Unique Local)
+ * - fe80::/10 (Link-Local)
+ * - ::ffff:0:0/96 (IPv4-mapped) - extracts and checks IPv4
+ */
+export function isPrivateIPv6(ip: string): boolean {
+  // Normalize IP
+  ip = ip.toLowerCase();
+
+  // Unspecified
+  if (ip === '::') return true;
+
+  // Loopback
+  if (ip === '::1') return true;
+
+  // Link-local (fe80::/10) - checks for fe8, fe9, fea, feb
+  if (ip.startsWith('fe8') || ip.startsWith('fe9') || ip.startsWith('fea') || ip.startsWith('feb')) {
+     // Additional check to ensure it's the start of the address
+     // But IPv6 string representation can be complex.
+     // Assuming standard representation where it starts with the hextet.
+     return true;
+  }
+
+  // Unique Local (fc00::/7) - fc or fd
+  if (ip.startsWith('fc') || ip.startsWith('fd')) return true;
+
+  // IPv4-mapped (::ffff:0:0/96) e.g., ::ffff:192.168.1.1
+  if (ip.includes('::ffff:')) {
+    const parts = ip.split(':');
+    const lastPart = parts[parts.length - 1];
+    // If the last part looks like IPv4, check it
+    if (lastPart.includes('.')) {
+      return isPrivateIP(lastPart);
+    }
+  }
+
+  return false;
+}
+
+/**
  * Validates a URL to prevent Server-Side Request Forgery (SSRF).
  * Blocks requests to localhost, private IPs, and non-HTTP(S) protocols.
  *
@@ -66,6 +110,46 @@ export function isSafeUrl(urlStr: string): boolean {
 
     return true;
   } catch {
+    return false;
+  }
+}
+
+/**
+ * Asynchronously validates a URL to prevent SSRF with DNS resolution.
+ * First performs synchronous checks, then resolves hostname and checks against private IPs.
+ *
+ * @param urlStr The URL to validate
+ * @returns Promise<boolean> true if safe, false if unsafe or resolution fails
+ */
+export async function isSafeUrlAsync(urlStr: string): Promise<boolean> {
+  // 1. Basic synchronous check
+  if (!isSafeUrl(urlStr)) {
+    return false;
+  }
+
+  try {
+    const url = new URL(urlStr);
+    const hostname = url.hostname;
+
+    // 2. Resolve DNS
+    // lookup returns the first address found
+    const { address, family } = await lookup(hostname);
+
+    // 3. Check resolved IP
+    if (family === 4) {
+      if (isPrivateIP(address)) {
+        return false;
+      }
+    } else if (family === 6) {
+      if (isPrivateIPv6(address)) {
+        return false;
+      }
+    }
+
+    return true;
+  } catch (error) {
+    // If DNS resolution fails, or any other error, treat as unsafe
+    // This assumes fail-closed behavior for security
     return false;
   }
 }
