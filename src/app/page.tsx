@@ -232,7 +232,7 @@ export default function SecurityDashboard() {
   const highlightCves = (text: string) => {
     const escaped = escapeHtml(text);
     const cveRegex = /CVE-\d{4}-\d{4,}/gi
-    return escaped.replace(cveRegex, (match) => `<span class="bg-gradient-to-r from-amber-400 to-orange-400 text-white font-bold px-1.5 py-0.5 rounded text-xs">${match}</span>`)
+    return escaped.replace(cveRegex, (match) => `<span class="bg-gradient-to-r from-amber-200 to-orange-200 text-slate-900 font-bold px-1.5 py-0.5 rounded text-xs border border-amber-300/50">${match}</span>`)
   }
 
   const displayedArticles = useMemo(() => {
@@ -650,13 +650,14 @@ export default function SecurityDashboard() {
                                           href={article.url}
                                           target="_blank"
                                           rel="noopener noreferrer"
-                                          className="hover:text-primary transition-colors flex items-start gap-2 group/link"
+                                          className="hover:text-primary transition-colors flex items-start gap-2 group/link focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-sm outline-none"
                                         >
                                           <span
                                             className="line-clamp-2"
                                             dangerouslySetInnerHTML={{ __html: highlightCves(article.title) }}
                                           />
-                                          <ExternalLink className="h-4 w-4 text-slate-400 group-hover/link:text-primary flex-shrink-0 mt-1 transition-colors" />
+                                          <ExternalLink className="h-4 w-4 text-slate-400 group-hover/link:text-primary flex-shrink-0 mt-1 transition-colors" aria-hidden="true" />
+                                          <span className="sr-only">(opens in new tab)</span>
                                         </a>
                                       </CardTitle>
                                     </div>
@@ -694,7 +695,7 @@ export default function SecurityDashboard() {
                                           href={`https://cve.mitre.org/cgi-bin/cvename.cgi?name=${cve.cveId}`}
                                           target="_blank"
                                           rel="noopener noreferrer"
-                                          className="group/cve"
+                                          className="group/cve focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-md outline-none"
                                           whileHover={{ scale: 1.05 }}
                                           whileTap={{ scale: 0.95 }}
                                         >
@@ -715,6 +716,7 @@ export default function SecurityDashboard() {
                                               </span>
                                             )}
                                           </Badge>
+                                          <span className="sr-only">(opens in new tab)</span>
                                         </motion.a>
                                       ))}
                                     </div>
@@ -725,9 +727,10 @@ export default function SecurityDashboard() {
                                       href={article.url}
                                       target="_blank"
                                       rel="noopener noreferrer"
-                                      className="inline-flex items-center gap-2 text-sm text-primary hover:text-primary/80 font-medium transition-colors group/link"
+                                      className="inline-flex items-center gap-2 text-sm text-primary hover:text-primary/80 font-medium transition-colors group/link focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-md outline-none"
                                     >
                                       Read Full Article
+                                      <span className="sr-only">(opens in new tab)</span>
                                       <ChevronRight className="h-4 w-4 group-hover/link:translate-x-1 transition-transform" />
                                     </a>
                                     {article.cves.length > 0 && (
