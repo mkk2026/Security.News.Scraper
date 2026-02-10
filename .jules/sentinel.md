@@ -17,3 +17,8 @@
 **Vulnerability:** The notification system allowed arbitrary webhook URLs, enabling SSRF attacks against local/private network resources (e.g., AWS metadata, internal APIs).
 **Learning:** `URL` class in Bun/Node automatically normalizes IP formats (e.g., `127.1` -> `127.0.0.1`), simplifying validation logic. Synchronous validation is partial (no DNS) but critical for defense-in-depth.
 **Prevention:** Validate all user-supplied URLs against a deny-list of private IPs and localhost before performing requests.
+
+## 2026-02-06 - SSRF via DNS Resolution
+**Vulnerability:** The synchronous `isSafeUrl` function only checked IP-like hostnames, allowing domains resolving to private IPs (e.g., `malicious.local` -> `127.0.0.1`) to bypass SSRF protection.
+**Learning:** Synchronous validation is insufficient for SSRF protection when user input is a domain name. DNS resolution is required to verify the destination IP.
+**Prevention:** Use `isSafeUrlAsync` which resolves DNS and validates all returned IP addresses (IPv4 and IPv6) against private ranges before allowing the request.
