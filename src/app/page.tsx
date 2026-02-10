@@ -20,6 +20,7 @@ import {
   BarChart3,
   Target,
   AlertCircle,
+  X,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -251,12 +252,19 @@ export default function SecurityDashboard() {
   }, [baseFilteredArticles, activeTab])
 
   const hasFilters = searchQuery || severityFilter !== 'all' || sourceFilter !== 'all' || activeTab !== 'all'
+  const hasActiveFilters = searchQuery || severityFilter !== 'all' || sourceFilter !== 'all'
 
   const clearFilters = () => {
     setSearchQuery('')
     setSeverityFilter('all')
     setSourceFilter('all')
     setActiveTab('all')
+  }
+
+  const resetFilters = () => {
+    setSearchQuery('')
+    setSeverityFilter('all')
+    setSourceFilter('all')
   }
 
   return (
@@ -490,6 +498,18 @@ export default function SecurityDashboard() {
                         <SelectItem value="security-week">Security Week</SelectItem>
                       </SelectContent>
                     </Select>
+
+                    {hasActiveFilters && (
+                      <Button
+                        variant="ghost"
+                        onClick={resetFilters}
+                        className="h-12 px-3 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
+                        aria-label="Clear active filters"
+                      >
+                        <X className="h-4 w-4 mr-2" />
+                        Clear Filters
+                      </Button>
+                    )}
                   </div>
                 </div>
                 <div className="flex items-center justify-between mt-4 text-sm">

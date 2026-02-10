@@ -19,3 +19,7 @@
 ## 2026-10-25 - Context for External Links & Focus Styles
 **Learning:** Links opening in new tabs (`target="_blank"`) lack context for screen readers, and custom components often miss focus styles.
 **Action:** Add `<span className="sr-only">(opens in new tab)</span>` inside the link and ensure `focus-visible` styles are applied, especially when `outline` is removed.
+
+## 2026-10-26 - Accessible Filter Clearance
+**Learning:** Relying solely on empty states to clear filters is insufficient when results are still visible. Users need an immediate way to reset their view without navigating away or triggering a "no results" state.
+**Action:** Implement a visible "Clear Filters" button adjacent to filter controls that appears conditionally when filters are active.
