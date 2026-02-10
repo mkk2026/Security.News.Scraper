@@ -15,3 +15,7 @@
 ## 2025-02-19 - [Array State Mutation]
 **Learning:** The sorting function `articles.sort()` sorts in place. When called on a state array (even if aliased), it mutated the underlying state directly, bypassing React's update lifecycle and potentially causing inconsistent UI behavior.
 **Action:** Always create a shallow copy before sorting state arrays: `[...articles].sort(...)`.
+
+## 2025-02-21 - [Regex Recompilation]
+**Learning:** A regex used for highlighting keywords was defined inside a render loop. This caused the regex to be recompiled for every item in the list on every render, adding unnecessary overhead.
+**Action:** Move regex definitions and helper functions outside of components or to utility files to ensure they are compiled once and reused.
