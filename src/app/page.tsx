@@ -34,6 +34,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import dynamic from 'next/dynamic'
 import { AnalyticsSkeleton } from '@/components/AnalyticsSkeleton'
 import { ArticleListSkeleton } from '@/components/ArticleListSkeleton'
+import { highlightCves } from '@/lib/text-utils'
 
 const AnalyticsDashboard = dynamic(() => import('@/components/AnalyticsDashboard'), {
   ssr: false,
@@ -219,21 +220,6 @@ export default function SecurityDashboard() {
 
     return filtered
   }, [articles, searchQuery, severityFilter, sourceFilter])
-
-  const escapeHtml = (unsafe: string) => {
-    return unsafe
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
-  }
-
-  const highlightCves = (text: string) => {
-    const escaped = escapeHtml(text);
-    const cveRegex = /CVE-\d{4}-\d{4,}/gi
-    return escaped.replace(cveRegex, (match) => `<span class="bg-gradient-to-r from-amber-200 to-orange-200 text-slate-900 font-bold px-1.5 py-0.5 rounded text-xs border border-amber-300/50">${match}</span>`)
-  }
 
   const displayedArticles = useMemo(() => {
     let result = baseFilteredArticles
