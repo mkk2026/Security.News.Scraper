@@ -17,3 +17,8 @@
 **Vulnerability:** The notification system allowed arbitrary webhook URLs, enabling SSRF attacks against local/private network resources (e.g., AWS metadata, internal APIs).
 **Learning:** `URL` class in Bun/Node automatically normalizes IP formats (e.g., `127.1` -> `127.0.0.1`), simplifying validation logic. Synchronous validation is partial (no DNS) but critical for defense-in-depth.
 **Prevention:** Validate all user-supplied URLs against a deny-list of private IPs and localhost before performing requests.
+
+## 2026-02-06 - IPv6 Loopback Bypass in SSRF Protection
+**Vulnerability:** Synchronous `isSafeUrl` and IPv4-only `isPrivateIP` checks failed to block `localhost` when it resolves to `::1` (IPv6 loopback) in Bun/Node environments.
+**Learning:** `dns.lookup` prefers IPv6 by default in many environments. Blocking only IPv4 private ranges is insufficient.
+**Prevention:** Implement `isPrivateIPv6` and use `dns.lookup` to resolve and validate both IPv4 and IPv6 addresses before allowing outbound requests.
