@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
 
     // Fetch articles with related CVEs
     // Optimized: Select only necessary fields to reduce payload size
-    const articles = await db.securityArticle.findMany({
+    const articlesPromise = db.securityArticle.findMany({
       where,
       select: {
         id: true,
@@ -91,7 +91,17 @@ export async function GET(request: NextRequest) {
     })
 
     // Get statistics (cached)
-    const stats = await getStats()
+    const statsPromise = getStats()
+
+    // Get total count for pagination
+    const totalPromise = db.securityArticle.count({ where })
+
+    // Execute queries in parallel to reduce latency
+    const [articles, stats, total] = await Promise.all([
+      articlesPromise,
+      statsPromise,
+      totalPromise,
+    ])
 
     return NextResponse.json({
       articles,
@@ -99,7 +109,7 @@ export async function GET(request: NextRequest) {
       pagination: {
         limit,
         offset,
-        total: await db.securityArticle.count({ where }),
+        total,
       },
     })
   } catch (error) {
