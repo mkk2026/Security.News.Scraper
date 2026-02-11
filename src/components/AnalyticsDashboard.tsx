@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
-import { TrendingUp, Shield, Globe, Target, AlertCircle, RefreshCw, BarChart3 } from 'lucide-react'
+import { TrendingUp, Shield, Globe, Target, AlertCircle, RefreshCw, BarChart3, ExternalLink } from 'lucide-react'
 import { AnalyticsSkeleton } from '@/components/AnalyticsSkeleton'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
@@ -160,34 +160,44 @@ export default function AnalyticsDashboard() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
+          <ol className="space-y-3">
             {data.topCves.slice(0, 8).map((cve, index) => (
-              <div key={cve.cveId} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center text-sm font-bold text-primary">
-                    {index + 1}
+              <li key={cve.cveId}>
+                <a
+                  href={`https://cve.mitre.org/cgi-bin/cvename.cgi?name=${cve.cveId}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors group focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 outline-none"
+                  aria-label={`View details for ${cve.cveId}`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center text-sm font-bold text-primary">
+                      {index + 1}
+                    </div>
+                    <div>
+                      <div className="font-mono font-semibold">{cve.cveId}</div>
+                      {cve.cvssScore && (
+                        <div className="text-sm text-slate-500">CVSS: {cve.cvssScore}</div>
+                      )}
+                    </div>
                   </div>
-                  <div>
-                    <div className="font-mono font-semibold">{cve.cveId}</div>
-                    {cve.cvssScore && (
-                      <div className="text-sm text-slate-500">CVSS: {cve.cvssScore}</div>
+                  <div className="flex items-center gap-2">
+                    {cve.severity && (
+                      <span className={`px-2 py-1 rounded text-xs font-medium text-white`}
+                            style={{ backgroundColor: SEVERITY_COLORS[cve.severity as keyof typeof SEVERITY_COLORS] }}>
+                        {cve.severity}
+                      </span>
                     )}
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  {cve.severity && (
-                    <span className={`px-2 py-1 rounded text-xs font-medium text-white`} 
-                          style={{ backgroundColor: SEVERITY_COLORS[cve.severity as keyof typeof SEVERITY_COLORS] }}>
-                      {cve.severity}
+                    <span className="text-sm text-slate-600 dark:text-slate-400">
+                      {cve.articleCount} articles
                     </span>
-                  )}
-                  <span className="text-sm text-slate-600 dark:text-slate-400">
-                    {cve.articleCount} articles
-                  </span>
-                </div>
-              </div>
+                    <ExternalLink className="h-4 w-4 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity ml-2" />
+                    <span className="sr-only">(opens in new tab)</span>
+                  </div>
+                </a>
+              </li>
             ))}
-          </div>
+          </ol>
         </CardContent>
       </Card>
     </div>
