@@ -19,3 +19,7 @@
 ## 2025-02-21 - [Regex Recompilation]
 **Learning:** A regex used for highlighting keywords was defined inside a render loop. This caused the regex to be recompiled for every item in the list on every render, adding unnecessary overhead.
 **Action:** Move regex definitions and helper functions outside of components or to utility files to ensure they are compiled once and reused.
+
+## 2025-02-24 - [Parallel DB Queries]
+**Learning:** The articles API was executing `findMany`, `getStats`, and `count` sequentially, adding unnecessary latency. Independent Prisma queries should be parallelized.
+**Action:** Use `Promise.all` to execute independent DB queries concurrently, especially when one of them (like `count`) might be slow.
