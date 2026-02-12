@@ -33,6 +33,12 @@ export function isPrivateIP(ip: string): boolean {
   // 169.254.0.0/16
   if (parts[0] === 169 && parts[1] === 254) return true;
 
+  // 100.64.0.0/10 (CGNAT)
+  if (parts[0] === 100 && parts[1] >= 64 && parts[1] <= 127) return true;
+
+  // 198.18.0.0/15 (Benchmarking)
+  if (parts[0] === 198 && (parts[1] === 18 || parts[1] === 19)) return true;
+
   // 0.0.0.0/8
   if (parts[0] === 0) return true;
 
