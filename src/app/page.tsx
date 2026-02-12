@@ -20,6 +20,7 @@ import {
   BarChart3,
   Target,
   AlertCircle,
+  X,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -445,8 +446,17 @@ export default function SecurityDashboard() {
                         placeholder="Search articles, CVEs, or software..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-12 h-12 bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary/20 transition-all"
+                        className="pl-12 h-12 bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary/20 transition-all pr-10"
                       />
+                      {searchQuery && (
+                        <button
+                          onClick={() => setSearchQuery('')}
+                          aria-label="Clear search"
+                          className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors focus-visible:ring-2 focus-visible:ring-primary outline-none"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      )}
                     </div>
                   </div>
                   <div className="flex gap-2 flex-wrap">

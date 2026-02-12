@@ -19,3 +19,7 @@
 ## 2026-10-25 - Context for External Links & Focus Styles
 **Learning:** Links opening in new tabs (`target="_blank"`) lack context for screen readers, and custom components often miss focus styles.
 **Action:** Add `<span className="sr-only">(opens in new tab)</span>` inside the link and ensure `focus-visible` styles are applied, especially when `outline` is removed.
+
+## 2026-10-26 - Clearable Search Inputs
+**Learning:** Users expect to quickly reset search fields without manual backspacing. Standard inputs lack this by default.
+**Action:** Always wrap search inputs in a relative container and add an absolute-positioned "Clear" button (X icon) that appears when text is present.
