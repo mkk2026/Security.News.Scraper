@@ -10,6 +10,8 @@ describe("Security Utilities", () => {
       expect(isPrivateIP("172.31.255.255")).toBe(true);
       expect(isPrivateIP("127.0.0.1")).toBe(true);
       expect(isPrivateIP("169.254.0.1")).toBe(true);
+      expect(isPrivateIP("100.64.0.1")).toBe(true); // Carrier-grade NAT
+      expect(isPrivateIP("198.18.0.1")).toBe(true); // Benchmarking
     });
 
     test("identifies public IPs correctly", () => {
@@ -52,11 +54,20 @@ describe("Security Utilities", () => {
       expect(isSafeUrl("http://[::1]/api")).toBe(false);
     });
 
+    test("blocks short-hand and obfuscated localhost", () => {
+      expect(isSafeUrl("http://127.1")).toBe(false); // Short-hand 127.0.0.1
+      expect(isSafeUrl("http://0177.0.0.1")).toBe(false); // Octal
+      expect(isSafeUrl("http://0x7f000001")).toBe(false); // Hex
+      expect(isSafeUrl("http://2130706433")).toBe(false); // Decimal
+    });
+
     test("blocks private IPs", () => {
       expect(isSafeUrl("http://192.168.1.1/admin")).toBe(false);
       expect(isSafeUrl("http://10.0.0.5:8080")).toBe(false);
       expect(isSafeUrl("http://127.0.0.1")).toBe(false);
       expect(isSafeUrl("http://169.254.169.254/latest/meta-data/")).toBe(false);
+      expect(isSafeUrl("http://100.64.0.1")).toBe(false); // Carrier-grade NAT
+      expect(isSafeUrl("http://198.18.0.1")).toBe(false); // Benchmarking
     });
 
     test("blocks non-http protocols", () => {

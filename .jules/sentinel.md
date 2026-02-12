@@ -22,3 +22,8 @@
 **Vulnerability:** Synchronous `isSafeUrl` and IPv4-only `isPrivateIP` checks failed to block `localhost` when it resolves to `::1` (IPv6 loopback) in Bun/Node environments.
 **Learning:** `dns.lookup` prefers IPv6 by default in many environments. Blocking only IPv4 private ranges is insufficient.
 **Prevention:** Implement `isPrivateIPv6` and use `dns.lookup` to resolve and validate both IPv4 and IPv6 addresses before allowing outbound requests.
+
+## 2026-02-07 - Incomplete Private IP Range Validation
+**Vulnerability:** `isPrivateIP` validation was missing Carrier-Grade NAT (`100.64.0.0/10`) and Benchmarking (`198.18.0.0/15`) ranges, potentially allowing SSRF to these internal/reserved networks.
+**Learning:** Standard private IP lists (RFC 1918) often omit other reserved ranges that can be used for internal routing or testing.
+**Prevention:** Include all IANA reserved IPv4 ranges in validation logic, not just RFC 1918. Also, rely on `URL` parser normalization to handle short-hand IP formats (e.g., `127.1` -> `127.0.0.1`) before validation.
