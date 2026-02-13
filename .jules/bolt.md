@@ -19,3 +19,7 @@
 ## 2025-02-21 - [Regex Recompilation]
 **Learning:** A regex used for highlighting keywords was defined inside a render loop. This caused the regex to be recompiled for every item in the list on every render, adding unnecessary overhead.
 **Action:** Move regex definitions and helper functions outside of components or to utility files to ensure they are compiled once and reused.
+
+## 2025-02-23 - [Duplicate Tab Content Rendering]
+**Learning:** Using a dynamic `TabsContent value={activeTab}` alongside a static `TabsContent value="analytics"` caused both to render simultaneously when `activeTab` was "analytics". This led to double mounting of heavy components.
+**Action:** Use conditional rendering (e.g., `{activeTab !== 'analytics' && <TabsContent ...>}`) to ensure only the intended tab content is mounted, especially when using dynamic values in Radix UI Tabs.
