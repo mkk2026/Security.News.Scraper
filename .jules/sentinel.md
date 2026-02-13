@@ -22,3 +22,8 @@
 **Vulnerability:** Synchronous `isSafeUrl` and IPv4-only `isPrivateIP` checks failed to block `localhost` when it resolves to `::1` (IPv6 loopback) in Bun/Node environments.
 **Learning:** `dns.lookup` prefers IPv6 by default in many environments. Blocking only IPv4 private ranges is insufficient.
 **Prevention:** Implement `isPrivateIPv6` and use `dns.lookup` to resolve and validate both IPv4 and IPv6 addresses before allowing outbound requests.
+
+## 2026-02-07 - Stored XSS via RSS Feed URLs
+**Vulnerability:** The RSS scraper blindly extracted `<link>` contents without protocol validation, allowing malicious feeds to inject `javascript:` URLs that would execute when users clicked the article link.
+**Learning:** Sanitizing HTML tags (e.g., stripping `<script>`) does not protect against XSS in attributes like `href`. URLs must be explicitly validated for safe protocols (`http`/`https`).
+**Prevention:** Always validate external URLs using a strict helper (like `isSafeUrl`) before persistence, ensuring they conform to expected protocols and do not point to local/internal resources.
