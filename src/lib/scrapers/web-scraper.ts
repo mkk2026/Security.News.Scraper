@@ -1,3 +1,5 @@
+import { isSafeUrl } from '@/lib/security'
+
 export interface ScrapedArticle {
   url: string
   title: string
@@ -95,7 +97,15 @@ function parseRSSXML(xml: string, source: SecuritySource): ScrapedArticle[] {
 
       // Extract link
       const linkMatch = item.match(/<link[^>]*>(.*?)<\/link>/is)
-      const link = linkMatch ? stripCDATA(linkMatch[1].trim()) : ''
+      const rawLink = linkMatch ? stripCDATA(linkMatch[1].trim()) : ''
+
+      // Validate link security (prevent XSS via javascript: URLs)
+      let link = ''
+      if (rawLink && isSafeUrl(rawLink)) {
+        link = rawLink
+      } else if (rawLink) {
+        console.warn(`Blocked unsafe URL from ${source.name}: ${rawLink}`)
+      }
 
       // Extract description/summary
       const descMatch = item.match(/<description[^>]*>(.*?)<\/description>/is)
