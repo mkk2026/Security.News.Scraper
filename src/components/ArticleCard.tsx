@@ -18,7 +18,7 @@ import {
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { highlightCves } from '@/lib/text-utils'
+import { highlightCves, hasCves } from '@/lib/text-utils'
 
 export interface Cve {
   id: string
@@ -178,10 +178,14 @@ const ArticleCard = React.memo(({ article }: ArticleCardProps) => {
                 rel="noopener noreferrer"
                 className="hover:text-primary transition-colors flex items-start gap-2 group/link focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-sm outline-none"
               >
-                <span
-                  className="line-clamp-2"
-                  dangerouslySetInnerHTML={{ __html: highlightCves(article.title) }}
-                />
+                {hasCves(article.title) ? (
+                  <span
+                    className="line-clamp-2"
+                    dangerouslySetInnerHTML={{ __html: highlightCves(article.title) }}
+                  />
+                ) : (
+                  <span className="line-clamp-2">{article.title}</span>
+                )}
                 <ExternalLink className="h-4 w-4 text-slate-400 group-hover/link:text-primary flex-shrink-0 mt-1 transition-colors" aria-hidden="true" />
                 <span className="sr-only">(opens in new tab)</span>
               </a>
@@ -207,10 +211,16 @@ const ArticleCard = React.memo(({ article }: ArticleCardProps) => {
 
       <CardContent className="pt-0 space-y-4">
         {article.summary && (
-          <p
-            className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed"
-            dangerouslySetInnerHTML={{ __html: highlightCves(article.summary) }}
-          />
+          hasCves(article.summary) ? (
+            <p
+              className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed"
+              dangerouslySetInnerHTML={{ __html: highlightCves(article.summary) }}
+            />
+          ) : (
+            <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+              {article.summary}
+            </p>
+          )
         )}
 
         {article.cves.length > 0 && (

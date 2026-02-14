@@ -1,5 +1,17 @@
 // Constants
 const CVE_REGEX = /CVE-\d{4}-\d{4,}/gi;
+const CVE_CHECK_REGEX = /cve-/i;
+
+/**
+ * Checks if text contains potential CVE identifiers.
+ * This is a fast pre-check to avoid expensive highlighting operations.
+ *
+ * @param text The text to check.
+ * @returns True if the text might contain a CVE ID.
+ */
+export function hasCves(text: string): boolean {
+  return CVE_CHECK_REGEX.test(text);
+}
 
 /**
  * Escapes potentially unsafe HTML characters.
