@@ -19,3 +19,7 @@
 ## 2026-10-25 - Context for External Links & Focus Styles
 **Learning:** Links opening in new tabs (`target="_blank"`) lack context for screen readers, and custom components often miss focus styles.
 **Action:** Add `<span className="sr-only">(opens in new tab)</span>` inside the link and ensure `focus-visible` styles are applied, especially when `outline` is removed.
+
+## 2026-02-14 - Search Input UX Patterns
+**Learning:** Search is a primary navigation tool. Users expect keyboard shortcuts (Cmd+K) and easy clearing mechanisms. Visual hints for shortcuts and dynamic clear buttons reduce friction significantly.
+**Action:** Implement global `Cmd+K` listeners with visual `kbd` hints for search focus, and ensure a clear button appears whenever input has value.
