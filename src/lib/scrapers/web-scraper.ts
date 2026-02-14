@@ -1,3 +1,5 @@
+import { isSafeUrl } from '../security'
+
 export interface ScrapedArticle {
   url: string
   title: string
@@ -112,7 +114,8 @@ function parseRSSXML(xml: string, source: SecuritySource): ScrapedArticle[] {
       // Clean up HTML from description
       const summary = cleanHTML(description)
 
-      if (title && link) {
+      // Ensure URL is safe (prevents XSS like javascript:)
+      if (title && link && isSafeUrl(link)) {
         articles.push({
           url: link,
           title,
