@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import {
   Shield,
   AlertTriangle,
@@ -16,6 +16,7 @@ import {
   BarChart3,
   Target,
   AlertCircle,
+  X,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -52,6 +53,18 @@ export default function SecurityDashboard() {
   const [sourceFilter, setSourceFilter] = useState<string>('all')
   const [lastUpdated, setLastUpdated] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState('all')
+  const searchInputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault()
+        searchInputRef.current?.focus()
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
 
   const fetchArticles = async () => {
     setLoading(true)
@@ -345,12 +358,32 @@ export default function SecurityDashboard() {
                     <div className="relative group">
                       <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-primary transition-colors" />
                       <Input
+                        ref={searchInputRef}
                         aria-label="Search articles, CVEs, or software"
                         placeholder="Search articles, CVEs, or software..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-12 h-12 bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary/20 transition-all"
+                        className="pl-12 pr-12 h-12 bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary/20 transition-all"
                       />
+                      <div className="absolute right-4 top-1/2 transform -translate-y-1/2 flex items-center">
+                        {searchQuery ? (
+                          <button
+                            onClick={() => {
+                              setSearchQuery('')
+                              searchInputRef.current?.focus()
+                            }}
+                            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                            aria-label="Clear search"
+                            type="button"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        ) : (
+                          <kbd className="hidden sm:inline-flex h-5 select-none items-center gap-1 rounded border bg-slate-100 px-1.5 font-mono text-[10px] font-medium text-slate-500 opacity-100 dark:bg-slate-800 dark:text-slate-400 pointer-events-none">
+                            <span className="text-xs">⌘</span>K
+                          </kbd>
+                        )}
+                      </div>
                     </div>
                   </div>
                   <div className="flex gap-2 flex-wrap">
