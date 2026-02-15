@@ -1,5 +1,5 @@
 import { db } from '@/lib/db'
-import { isSafeUrlAsync } from '@/lib/security'
+import { isSafeUrlAsync, safeFetch } from '@/lib/security'
 
 export interface NotificationConfig {
   type: 'email' | 'webhook'
@@ -165,7 +165,7 @@ async function sendWebhookNotification(
   }
 
   try {
-    const response = await fetch(webhookUrl, {
+    const response = await safeFetch(webhookUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

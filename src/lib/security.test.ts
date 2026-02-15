@@ -1,5 +1,5 @@
-import { describe, expect, test } from "bun:test";
-import { isPrivateIP, isPrivateIPv6, isSafeUrl, isSafeUrlAsync } from "./security";
+import { describe, expect, test, mock, afterEach } from "bun:test";
+import { isPrivateIP, isPrivateIPv6, isSafeUrl, isSafeUrlAsync, safeFetch } from "./security";
 
 describe("Security Utilities", () => {
   describe("isPrivateIP", () => {
@@ -91,6 +91,108 @@ describe("Security Utilities", () => {
 
     test("handles invalid URLs", async () => {
       expect(await isSafeUrlAsync("not-a-url")).toBe(false);
+    });
+  });
+
+  describe("safeFetch", () => {
+    const originalFetch = global.fetch;
+
+    afterEach(() => {
+      global.fetch = originalFetch;
+      mock.restore();
+    });
+
+    test("fetches a safe URL successfully", async () => {
+      global.fetch = mock(async () => new Response("OK"));
+
+      const res = await safeFetch("http://example.com");
+      expect(res).toBeDefined();
+      expect(await res.text()).toBe("OK");
+    });
+
+    test("blocks an unsafe URL initially", async () => {
+      try {
+        await safeFetch("http://127.0.0.1");
+        throw new Error("Should have failed");
+      } catch (e: any) {
+        expect(e.message).toContain("Security Violation");
+      }
+    });
+
+    test("follows a safe redirect", async () => {
+      let callCount = 0;
+      global.fetch = mock(async (url) => {
+        callCount++;
+        const urlStr = url.toString();
+        if (urlStr.includes("example.com")) {
+          return new Response(null, {
+            status: 302,
+            headers: { Location: "http://example.org/" }
+          });
+        }
+        if (urlStr.includes("example.org")) {
+          return new Response("Redirected OK");
+        }
+        return new Response("Not Found", { status: 404 });
+      });
+
+      const res = await safeFetch("http://example.com");
+      expect(await res.text()).toBe("Redirected OK");
+      expect(callCount).toBe(2);
+    });
+
+    test("blocks a redirect to an unsafe URL", async () => {
+      global.fetch = mock(async (url) => {
+        const urlStr = url.toString();
+        if (urlStr.includes("example.com")) {
+          return new Response(null, {
+            status: 302,
+            headers: { Location: "http://127.0.0.1/" }
+          });
+        }
+        return new Response("Should not be reached");
+      });
+
+      try {
+        await safeFetch("http://example.com");
+        throw new Error("Should have failed");
+      } catch (e: any) {
+        expect(e.message).toContain("Security Violation");
+      }
+    });
+
+    test("handles POST to GET redirect (302)", async () => {
+      let lastMethod = "";
+      global.fetch = mock(async (url, options) => {
+        lastMethod = options?.method || "GET";
+        const urlStr = url.toString();
+        if (urlStr.includes("example.com")) {
+          return new Response(null, {
+            status: 302,
+            headers: { Location: "http://example.org/" }
+          });
+        }
+        return new Response("OK");
+      });
+
+      await safeFetch("http://example.com", { method: "POST", body: "data" });
+      expect(lastMethod).toBe("GET");
+    });
+
+    test("throws on max redirects exceeded", async () => {
+      global.fetch = mock(async () => {
+        return new Response(null, {
+          status: 302,
+          headers: { Location: "http://example.com/loop" }
+        });
+      });
+
+      try {
+        await safeFetch("http://example.com");
+        throw new Error("Should have failed");
+      } catch (e: any) {
+        expect(e.message).toContain("Too many redirects");
+      }
     });
   });
 });
