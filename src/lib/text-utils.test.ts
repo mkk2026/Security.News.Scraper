@@ -1,7 +1,33 @@
 import { expect, test, describe } from "bun:test";
-import { escapeHtml, highlightCves } from "./text-utils";
+import { escapeHtml, highlightCves, hasCves } from "./text-utils";
 
 describe("text-utils", () => {
+  describe("hasCves", () => {
+    test("returns true for uppercase CVE", () => {
+      expect(hasCves("CVE-2023-1234")).toBe(true);
+    });
+
+    test("returns true for lowercase CVE", () => {
+      expect(hasCves("cve-2023-1234")).toBe(true);
+    });
+
+    test("returns true for mixed case CVE", () => {
+      expect(hasCves("CvE-2023-1234")).toBe(true);
+    });
+
+    test("returns true for text containing CVE", () => {
+      expect(hasCves("This contains CVE-2023-1234")).toBe(true);
+    });
+
+    test("returns false for text without CVE", () => {
+      expect(hasCves("No vulnerabilities found")).toBe(false);
+    });
+
+    test("returns false for empty string", () => {
+      expect(hasCves("")).toBe(false);
+    });
+  });
+
   describe("escapeHtml", () => {
     test("escapes special characters", () => {
       const input = '<script>alert("XSS")</script> & \'test\'';

@@ -19,3 +19,7 @@
 ## 2025-02-21 - [Regex Recompilation]
 **Learning:** A regex used for highlighting keywords was defined inside a render loop. This caused the regex to be recompiled for every item in the list on every render, adding unnecessary overhead.
 **Action:** Move regex definitions and helper functions outside of components or to utility files to ensure they are compiled once and reused.
+
+## 2025-02-22 - [Optimized Text Rendering]
+**Learning:** Using `dangerouslySetInnerHTML` with complex regex replacement for highlighting (e.g., `highlightCves`) is expensive (approx. 7ms/call vs 0.3ms/check).
+**Action:** Implement a fast pre-check (e.g., `hasCves` using `regex.test()`) to conditionally bypass expensive rendering paths when the data doesn't require it.
