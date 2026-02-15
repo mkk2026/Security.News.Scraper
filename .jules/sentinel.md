@@ -22,3 +22,8 @@
 **Vulnerability:** Synchronous `isSafeUrl` and IPv4-only `isPrivateIP` checks failed to block `localhost` when it resolves to `::1` (IPv6 loopback) in Bun/Node environments.
 **Learning:** `dns.lookup` prefers IPv6 by default in many environments. Blocking only IPv4 private ranges is insufficient.
 **Prevention:** Implement `isPrivateIPv6` and use `dns.lookup` to resolve and validate both IPv4 and IPv6 addresses before allowing outbound requests.
+
+## 2026-02-07 - SSRF via Open Redirects
+**Vulnerability:** Webhook notifications were vulnerable to SSRF because `fetch` automatically follows redirects, allowing attackers to bypass initial URL validation by redirecting to an internal IP (e.g., `127.0.0.1`).
+**Learning:** Initial URL validation is insufficient against sophisticated SSRF attacks involving redirects (TOCTOU). `fetch` API in Node/Bun does not offer native "safe redirect" handling.
+**Prevention:** Implement a custom `safeFetch` wrapper that handles redirects manually (`redirect: 'manual'`) and validates each intermediate URL against the security policy before following.

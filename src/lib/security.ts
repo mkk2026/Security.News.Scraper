@@ -128,3 +128,64 @@ export async function isSafeUrlAsync(urlStr: string): Promise<boolean> {
     return false;
   }
 }
+
+/**
+ * A secure wrapper around fetch that prevents SSRF via redirects.
+ * Manually handles redirects and validates each target URL against isSafeUrlAsync.
+ *
+ * @param url The URL to fetch.
+ * @param options Fetch options.
+ * @returns The fetch response.
+ * @throws Error if any URL in the redirect chain is unsafe or if max redirects exceeded.
+ */
+export async function safeFetch(url: string | URL, options: RequestInit = {}): Promise<Response> {
+  const MAX_REDIRECTS = 5;
+  let currentUrl = url.toString();
+  let currentOptions = { ...options };
+  let redirectCount = 0;
+
+  while (redirectCount <= MAX_REDIRECTS) {
+    // Validate current URL before fetching
+    if (!(await isSafeUrlAsync(currentUrl))) {
+      throw new Error(`Security Violation: Unsafe URL blocked: ${currentUrl}`);
+    }
+
+    // Perform fetch with manual redirect handling
+    const response = await fetch(currentUrl, {
+      ...currentOptions,
+      redirect: 'manual',
+    });
+
+    // Check for redirect status codes
+    if (response.status >= 300 && response.status < 400 && response.headers.get('location')) {
+      redirectCount++;
+      const location = response.headers.get('location')!;
+
+      // Resolve relative URLs
+      try {
+        currentUrl = new URL(location, currentUrl).toString();
+      } catch (e) {
+         throw new Error(`Invalid redirect location: ${location}`);
+      }
+
+      // Handle method changes for redirects
+      // 303 See Other: Always becomes GET
+      if (response.status === 303) {
+        currentOptions.method = 'GET';
+        currentOptions.body = undefined;
+      }
+      // 301 Moved Permanently / 302 Found: Typically become GET if original was POST
+      else if ((response.status === 301 || response.status === 302) && currentOptions.method === 'POST') {
+        currentOptions.method = 'GET';
+        currentOptions.body = undefined;
+      }
+      // 307/308 preserve method and body
+
+      continue;
+    }
+
+    return response;
+  }
+
+  throw new Error(`Too many redirects (max ${MAX_REDIRECTS})`);
+}
