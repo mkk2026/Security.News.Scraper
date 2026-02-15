@@ -19,3 +19,7 @@
 ## 2026-10-25 - Context for External Links & Focus Styles
 **Learning:** Links opening in new tabs (`target="_blank"`) lack context for screen readers, and custom components often miss focus styles.
 **Action:** Add `<span className="sr-only">(opens in new tab)</span>` inside the link and ensure `focus-visible` styles are applied, especially when `outline` is removed.
+
+## 2026-10-26 - Clearable Search Inputs
+**Learning:** Search inputs without a quick reset mechanism force users to manually delete text, which is tedious on mobile.
+**Action:** Always include a conditional "Clear" button (X icon) inside the input wrapper when text is present, ensuring `aria-label` is set for screen readers.
