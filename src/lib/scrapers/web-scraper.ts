@@ -166,16 +166,20 @@ function cleanHTML(html: string): string {
 export async function scrapeAllSources(): Promise<ScrapedArticle[]> {
   console.log('Starting to scrape all security sources...')
 
-  const allArticles: ScrapedArticle[] = []
-
-  for (const source of SOURCES) {
-    try {
-      const articles = await scrapeRSSFeed(source)
-      allArticles.push(...articles)
-    } catch (error) {
-      console.error(`Failed to scrape ${source.name}:`, error)
-    }
-  }
+  // Fetch all feeds in parallel
+  // We wrap in an extra try/catch block to ensure one failure doesn't stop all others
+  // even if scrapeRSSFeed's internal error handling fails
+  const results = await Promise.all(
+    SOURCES.map(async (source) => {
+      try {
+        return await scrapeRSSFeed(source)
+      } catch (error) {
+        console.error(`Unexpected error scraping ${source.name}:`, error)
+        return []
+      }
+    })
+  )
+  const allArticles = results.flat()
 
   console.log(`Total articles scraped: ${allArticles.length}`)
   return allArticles
