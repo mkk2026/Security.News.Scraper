@@ -23,3 +23,7 @@
 ## 2026-10-26 - Clearable Search Inputs
 **Learning:** Search inputs without a quick reset mechanism force users to manually delete text, which is tedious on mobile.
 **Action:** Always include a conditional "Clear" button (X icon) inside the input wrapper when text is present, ensuring `aria-label` is set for screen readers.
+
+## 2026-10-27 - Interactive Dashboard Summaries
+**Learning:** Users instinctively expect dashboard summary cards (e.g., "5 Critical Issues") to filter the list below, but static cards break this flow.
+**Action:** Implement summary cards as interactive filter shortcuts using semantic HTML or `role="button"` with full keyboard support (`tabIndex={0}`, `onKeyDown`), adding `cursor-pointer` and focus rings to signal interactivity.

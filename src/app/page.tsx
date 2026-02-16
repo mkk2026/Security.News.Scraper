@@ -209,6 +209,12 @@ export default function SecurityDashboard() {
             <motion.div
               whileHover={{ y: -4, scale: 1.02 }}
               transition={{ type: 'spring', stiffness: 300 }}
+              onClick={() => { clearFilters(); if (activeTab === 'analytics') setActiveTab('all'); }}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { clearFilters(); if (activeTab === 'analytics') setActiveTab('all'); } }}
+              className="cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-xl"
+              aria-label="View all articles (clear filters)"
             >
               <Card className="relative overflow-hidden bg-gradient-to-br from-white to-slate-50 dark:from-slate-900 dark:to-slate-800/50 border-slate-200/50 dark:border-slate-800/50 shadow-lg">
                 <CardHeader className="pb-3">
@@ -239,7 +245,12 @@ export default function SecurityDashboard() {
             <motion.div
               whileHover={{ y: -4, scale: 1.02 }}
               transition={{ type: 'spring', stiffness: 300 }}
-              className="delay-100"
+              className="delay-100 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-xl"
+              onClick={() => setActiveTab('analytics')}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setActiveTab('analytics') }}
+              aria-label="View CVE analytics"
             >
               <Card className="relative overflow-hidden bg-gradient-to-br from-white to-slate-50 dark:from-slate-900 dark:to-slate-800/50 border-slate-200/50 dark:border-slate-800/50 shadow-lg">
                 <CardHeader className="pb-3">
@@ -270,7 +281,12 @@ export default function SecurityDashboard() {
             <motion.div
               whileHover={{ y: -4, scale: 1.02 }}
               transition={{ type: 'spring', stiffness: 300 }}
-              className="delay-200"
+              className="delay-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-xl"
+              onClick={() => { setSeverityFilter('CRITICAL'); if (activeTab === 'analytics') setActiveTab('all'); }}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { setSeverityFilter('CRITICAL'); if (activeTab === 'analytics') setActiveTab('all'); } }}
+              aria-label="Filter by Critical severity"
             >
               <Card className="relative overflow-hidden bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-950/30 dark:to-orange-950/30 border-red-200/50 dark:border-red-800/50 shadow-lg shadow-red-500/10">
                 <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-red-500/10 to-orange-500/10 rounded-bl-full" />
@@ -302,7 +318,12 @@ export default function SecurityDashboard() {
             <motion.div
               whileHover={{ y: -4, scale: 1.02 }}
               transition={{ type: 'spring', stiffness: 300 }}
-              className="delay-300"
+              className="delay-300 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-xl"
+              onClick={() => { setSeverityFilter('HIGH'); if (activeTab === 'analytics') setActiveTab('all'); }}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { setSeverityFilter('HIGH'); if (activeTab === 'analytics') setActiveTab('all'); } }}
+              aria-label="Filter by High severity"
             >
               <Card className="relative overflow-hidden bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-950/30 dark:to-amber-950/30 border-orange-200/50 dark:border-orange-800/50 shadow-lg shadow-orange-500/10">
                 <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-orange-500/10 to-amber-500/10 rounded-bl-full" />
