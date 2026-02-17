@@ -23,3 +23,7 @@
 ## 2025-02-22 - [Optimized Text Rendering]
 **Learning:** Using `dangerouslySetInnerHTML` with complex regex replacement for highlighting (e.g., `highlightCves`) is expensive (approx. 7ms/call vs 0.3ms/check).
 **Action:** Implement a fast pre-check (e.g., `hasCves` using `regex.test()`) to conditionally bypass expensive rendering paths when the data doesn't require it.
+
+## 2025-02-24 - [Parallel IO Operations]
+**Learning:** The scraping logic was fetching RSS feeds sequentially using a `for...of` loop. This meant the total duration was the sum of all response times (approx. 400ms+ for 4 sources).
+**Action:** Use `Promise.all` to fetch data from independent sources in parallel, reducing the total duration to approximately the slowest single request (approx. 100ms).
