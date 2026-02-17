@@ -23,3 +23,7 @@
 ## 2026-10-26 - Clearable Search Inputs
 **Learning:** Search inputs without a quick reset mechanism force users to manually delete text, which is tedious on mobile.
 **Action:** Always include a conditional "Clear" button (X icon) inside the input wrapper when text is present, ensuring `aria-label` is set for screen readers.
+
+## 2026-10-27 - Global Search Shortcut
+**Learning:** Power users expect `Cmd+K` / `Ctrl+K` to instantly focus the primary search input on dashboards.
+**Action:** Implement global keydown listeners for this shortcut on main dashboard views, ensuring `preventDefault()` is called to stop browser defaults. Always pair with a visual hint inside the input.
