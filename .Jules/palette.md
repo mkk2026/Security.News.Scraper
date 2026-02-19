@@ -23,3 +23,7 @@
 ## 2026-10-26 - Clearable Search Inputs
 **Learning:** Search inputs without a quick reset mechanism force users to manually delete text, which is tedious on mobile.
 **Action:** Always include a conditional "Clear" button (X icon) inside the input wrapper when text is present, ensuring `aria-label` is set for screen readers.
+
+## 2026-10-27 - Keyboard Shortcuts for Search
+**Learning:** Users expect global shortcuts (Cmd+K) for primary search inputs. Providing visual hints that disappear on interaction guides users without cluttering the interface.
+**Action:** Implement `useRef` based focus management and `keydown` listeners for search inputs, with conditioned visual hints.
