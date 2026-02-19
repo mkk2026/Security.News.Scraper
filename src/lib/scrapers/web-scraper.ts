@@ -145,19 +145,22 @@ function cleanHTML(html: string): string {
   if (!html) return ''
 
   // Remove HTML tags
-  const text = html.replace(/<[^>]*>/g, ' ')
+  let text = html.replace(/<[^>]*>/g, ' ')
 
-  // Decode HTML entities
-  const decoded = text
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&nbsp;/g, ' ')
+  // Decode HTML entities efficiently
+  const replacements: Record<string, string> = {
+    '&amp;': '&',
+    '&lt;': '<',
+    '&gt;': '>',
+    '&quot;': '"',
+    '&#39;': "'",
+    '&nbsp;': ' '
+  }
+
+  text = text.replace(/&(?:amp|lt|gt|quot|#39|nbsp);/g, match => replacements[match])
 
   // Normalize whitespace
-  return decoded.replace(/\s+/g, ' ').trim()
+  return text.replace(/\s+/g, ' ').trim()
 }
 
 /**
@@ -166,16 +169,11 @@ function cleanHTML(html: string): string {
 export async function scrapeAllSources(): Promise<ScrapedArticle[]> {
   console.log('Starting to scrape all security sources...')
 
-  const allArticles: ScrapedArticle[] = []
-
-  for (const source of SOURCES) {
-    try {
-      const articles = await scrapeRSSFeed(source)
-      allArticles.push(...articles)
-    } catch (error) {
-      console.error(`Failed to scrape ${source.name}:`, error)
-    }
-  }
+  // Fetch all sources in parallel.
+  // Note: scrapeRSSFeed handles its own errors and returns [] on failure,
+  // so Promise.all will not reject if a single source fails.
+  const results = await Promise.all(SOURCES.map(source => scrapeRSSFeed(source)))
+  const allArticles = results.flat()
 
   console.log(`Total articles scraped: ${allArticles.length}`)
   return allArticles
