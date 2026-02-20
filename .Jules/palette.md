@@ -23,3 +23,7 @@
 ## 2026-10-26 - Clearable Search Inputs
 **Learning:** Search inputs without a quick reset mechanism force users to manually delete text, which is tedious on mobile.
 **Action:** Always include a conditional "Clear" button (X icon) inside the input wrapper when text is present, ensuring `aria-label` is set for screen readers.
+
+## 2026-10-27 - Relative Time in News Feeds
+**Learning:** In time-sensitive feeds (like security news), absolute timestamps (e.g., "10/26/2026 10:30 AM") increase cognitive load. Relative time (e.g., "2 hours ago") allows users to instantly gauge recency.
+**Action:** Use `formatDistanceToNow` (with strict suffix) for list items, but ALWAYS wrap it in a tooltip showing the full, exact date and time for precision.
