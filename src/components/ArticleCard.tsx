@@ -16,8 +16,10 @@ import {
   AlertCircle,
   AlertTriangle,
 } from 'lucide-react'
+import { formatDistanceToNow } from 'date-fns'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { highlightCves, hasCves } from '@/lib/text-utils'
 
 export interface Cve {
@@ -164,11 +166,20 @@ const ArticleCard = React.memo(({ article }: ArticleCardProps) => {
                 </Badge>
               )}
 
-              <span className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1">
-                <Clock className="h-3 w-3" />
-                {new Date(article.publishedAt).toLocaleDateString()} at{' '}
-                {new Date(article.publishedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-              </span>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1 cursor-help">
+                    <Clock className="h-3 w-3" />
+                    {formatDistanceToNow(new Date(article.publishedAt), { addSuffix: true })}
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>
+                    Published: {new Date(article.publishedAt).toLocaleDateString()} at{' '}
+                    {new Date(article.publishedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </p>
+                </TooltipContent>
+              </Tooltip>
             </div>
 
             <CardTitle className="text-lg sm:text-xl leading-snug">
