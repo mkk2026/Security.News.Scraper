@@ -2,6 +2,17 @@
 const CVE_REGEX = /CVE-\d{4}-\d{4,}/gi;
 const CVE_CHECK_REGEX = /cve-/i;
 
+// HTML Entity Map for faster escaping
+const ENTITY_MAP: Record<string, string> = {
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  "'": '&#039;',
+};
+
+const ESCAPE_REGEX = /[&<>"']/g;
+
 /**
  * Checks if text contains potential CVE identifiers.
  * This is a fast pre-check to avoid expensive highlighting operations.
@@ -15,16 +26,13 @@ export function hasCves(text: string): boolean {
 
 /**
  * Escapes potentially unsafe HTML characters.
+ * Optimized to use a single regex pass instead of chained replacements.
  * @param text The text to escape.
  * @returns The escaped text.
  */
 export function escapeHtml(text: string): string {
-  return text
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
+  if (!text) return text;
+  return text.replace(ESCAPE_REGEX, (char) => ENTITY_MAP[char]);
 }
 
 /**
