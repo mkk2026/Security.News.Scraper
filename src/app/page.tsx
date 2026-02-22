@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import {
   Shield,
   AlertTriangle,
@@ -53,6 +53,19 @@ export default function SecurityDashboard() {
   const [sourceFilter, setSourceFilter] = useState<string>('all')
   const [lastUpdated, setLastUpdated] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState('all')
+  const searchInputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault()
+        searchInputRef.current?.focus()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
 
   const fetchArticles = async () => {
     setLoading(true)
@@ -346,12 +359,21 @@ export default function SecurityDashboard() {
                     <div className="relative group">
                       <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-primary transition-colors pointer-events-none" />
                       <Input
+                        ref={searchInputRef}
+                        aria-keyshortcuts="Control+K"
                         aria-label="Search articles, CVEs, or software"
                         placeholder="Search articles, CVEs, or software..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="pl-12 pr-12 h-12 bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary/20 transition-all"
                       />
+                      {!searchQuery && (
+                        <div aria-hidden="true" className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none select-none opacity-50 hidden sm:flex items-center gap-1">
+                          <kbd className="inline-flex h-5 items-center gap-1 rounded border bg-slate-100 dark:bg-slate-800 px-1.5 font-mono text-[10px] font-medium text-slate-500 dark:text-slate-400 opacity-100">
+                            <span className="text-xs">⌘</span>K
+                          </kbd>
+                        </div>
+                      )}
                       {searchQuery && (
                         <button
                           onClick={() => setSearchQuery('')}
