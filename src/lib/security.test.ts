@@ -68,6 +68,12 @@ describe("Security Utilities", () => {
     test("handles invalid URLs", () => {
       expect(isSafeUrl("not-a-url")).toBe(false);
     });
+
+    test("blocks normalized private IPs", () => {
+      expect(isSafeUrl("http://127.1")).toBe(false);
+      expect(isSafeUrl("http://0x7f.0.0.1")).toBe(false);
+      expect(isSafeUrl("http://0177.0.0.1")).toBe(false);
+    });
   });
 
   describe("isSafeUrlAsync", () => {

@@ -27,3 +27,8 @@
 **Vulnerability:** Webhook notifications were vulnerable to SSRF because `fetch` automatically follows redirects, allowing attackers to bypass initial URL validation by redirecting to an internal IP (e.g., `127.0.0.1`).
 **Learning:** Initial URL validation is insufficient against sophisticated SSRF attacks involving redirects (TOCTOU). `fetch` API in Node/Bun does not offer native "safe redirect" handling.
 **Prevention:** Implement a custom `safeFetch` wrapper that handles redirects manually (`redirect: 'manual'`) and validates each intermediate URL against the security policy before following.
+
+## 2026-02-08 - Inconsistent Security Control Application
+**Vulnerability:** The RSS scraper (`scrapeRSSFeed`) bypassed the existing `safeFetch` utility, using raw `fetch` instead, re-introducing SSRF risks via malicious feeds or redirects.
+**Learning:** Having security utilities (like `safeFetch`) is useless if they aren't consistently applied. Developers often default to standard APIs (`fetch`) unless forced otherwise.
+**Prevention:** Audit all external network calls to ensure they use the designated security wrapper. Enforce usage via linting rules or code reviews.
