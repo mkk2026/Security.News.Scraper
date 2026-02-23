@@ -1,3 +1,5 @@
+import { safeFetch } from '@/lib/security'
+
 export interface ScrapedArticle {
   url: string
   title: string
@@ -55,8 +57,8 @@ export async function scrapeRSSFeed(source: SecuritySource): Promise<ScrapedArti
   try {
     console.log(`Scraping RSS feed from ${source.name}...`)
 
-    // Use the web-reader skill to fetch RSS content
-    const response = await fetch(source.rssUrl, {
+    // Use safeFetch to prevent SSRF
+    const response = await safeFetch(source.rssUrl, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (compatible; SecurityMonitor/1.0; +https://securitymonitor.example.com)',
       },
