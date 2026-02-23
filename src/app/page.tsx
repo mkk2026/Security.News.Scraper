@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import {
   Shield,
   AlertTriangle,
@@ -53,6 +53,18 @@ export default function SecurityDashboard() {
   const [sourceFilter, setSourceFilter] = useState<string>('all')
   const [lastUpdated, setLastUpdated] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState('all')
+  const searchInputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    const down = (e: KeyboardEvent) => {
+      if (e.key.toLowerCase() === 'k' && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault()
+        searchInputRef.current?.focus()
+      }
+    }
+    document.addEventListener('keydown', down)
+    return () => document.removeEventListener('keydown', down)
+  }, [])
 
   const fetchArticles = async () => {
     setLoading(true)
@@ -346,13 +358,15 @@ export default function SecurityDashboard() {
                     <div className="relative group">
                       <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-primary transition-colors pointer-events-none" />
                       <Input
+                        ref={searchInputRef}
+                        aria-keyshortcuts="Control+K"
                         aria-label="Search articles, CVEs, or software"
                         placeholder="Search articles, CVEs, or software..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="pl-12 pr-12 h-12 bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary/20 transition-all"
                       />
-                      {searchQuery && (
+                      {searchQuery ? (
                         <button
                           onClick={() => setSearchQuery('')}
                           className="absolute right-4 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/20 rounded-full p-1"
@@ -360,6 +374,12 @@ export default function SecurityDashboard() {
                         >
                           <X className="h-5 w-5" />
                         </button>
+                      ) : (
+                        <div className="absolute right-4 top-1/2 transform -translate-y-1/2 flex items-center gap-1 pointer-events-none">
+                          <kbd className="hidden sm:inline-flex h-5 select-none items-center gap-1 rounded border bg-slate-200 dark:bg-slate-800 px-1.5 font-mono text-[10px] font-medium text-slate-500 dark:text-slate-400 opacity-100">
+                            <span className="text-xs">⌘</span>K
+                          </kbd>
+                        </div>
                       )}
                     </div>
                   </div>
