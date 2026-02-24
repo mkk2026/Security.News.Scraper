@@ -23,3 +23,7 @@
 ## 2025-02-22 - [Optimized Text Rendering]
 **Learning:** Using `dangerouslySetInnerHTML` with complex regex replacement for highlighting (e.g., `highlightCves`) is expensive (approx. 7ms/call vs 0.3ms/check).
 **Action:** Implement a fast pre-check (e.g., `hasCves` using `regex.test()`) to conditionally bypass expensive rendering paths when the data doesn't require it.
+
+## 2025-02-23 - [Tabs Double Rendering]
+**Learning:** In the Dashboard, `<TabsContent value={activeTab}>` was used to show the article list for non-analytics tabs. However, when `activeTab` was 'analytics', this component still rendered (because the value matched) alongside the explicit `<TabsContent value="analytics">`. This caused the heavy article list to render hidden underneath the analytics dashboard.
+**Action:** Use explicit conditional rendering (`{activeTab !== 'analytics' && ...}`) to unmount heavy components when their tab is not active, rather than relying solely on Radix UI's `TabsContent` value matching.

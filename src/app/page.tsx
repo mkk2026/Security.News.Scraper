@@ -135,7 +135,7 @@ export default function SecurityDashboard() {
 
     if (activeTab === 'recent') {
       // Create a shallow copy before sorting to avoid mutating the original array
-      result = [...result].sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()).slice(0, 10)
+      result = [...result].sort((a, b) => b.publishedAt.localeCompare(a.publishedAt)).slice(0, 10)
     }
 
     return result
@@ -445,11 +445,12 @@ export default function SecurityDashboard() {
                 <AnalyticsDashboard />
               </TabsContent>
 
-              <TabsContent value={activeTab} className="mt-6">
-                <ScrollArea className="h-[600px] pr-4">
-                  {loading && baseFilteredArticles.length === 0 ? (
-                    <ArticleListSkeleton />
-                  ) : displayedArticles.length === 0 ? (
+              {activeTab !== 'analytics' && (
+                <TabsContent value={activeTab} className="mt-6">
+                  <ScrollArea className="h-[600px] pr-4">
+                    {loading && baseFilteredArticles.length === 0 ? (
+                      <ArticleListSkeleton />
+                    ) : displayedArticles.length === 0 ? (
                     <motion.div
                       initial={{ opacity: 0, scale: 0.9 }}
                       animate={{ opacity: 1, scale: 1 }}
@@ -495,9 +496,10 @@ export default function SecurityDashboard() {
                         ))}
                       </div>
                     </AnimatePresence>
-                  )}
-                </ScrollArea>
-              </TabsContent>
+                    )}
+                  </ScrollArea>
+                </TabsContent>
+              )}
             </Tabs>
           </motion.div>
         </main>
