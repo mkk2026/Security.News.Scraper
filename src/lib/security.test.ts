@@ -52,6 +52,11 @@ describe("Security Utilities", () => {
       expect(isSafeUrl("http://[::1]/api")).toBe(false);
     });
 
+    test("blocks private IPv6", () => {
+      expect(isSafeUrl("http://[fc00::1]/api")).toBe(false);
+      expect(isSafeUrl("http://[fe80::1]")).toBe(false);
+    });
+
     test("blocks private IPs", () => {
       expect(isSafeUrl("http://192.168.1.1/admin")).toBe(false);
       expect(isSafeUrl("http://10.0.0.5:8080")).toBe(false);

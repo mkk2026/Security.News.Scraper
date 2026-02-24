@@ -27,3 +27,8 @@
 **Vulnerability:** Webhook notifications were vulnerable to SSRF because `fetch` automatically follows redirects, allowing attackers to bypass initial URL validation by redirecting to an internal IP (e.g., `127.0.0.1`).
 **Learning:** Initial URL validation is insufficient against sophisticated SSRF attacks involving redirects (TOCTOU). `fetch` API in Node/Bun does not offer native "safe redirect" handling.
 **Prevention:** Implement a custom `safeFetch` wrapper that handles redirects manually (`redirect: 'manual'`) and validates each intermediate URL against the security policy before following.
+
+## 2026-02-08 - Synchronous IPv6 Bypass in isSafeUrl
+**Vulnerability:** The synchronous `isSafeUrl` function failed to block private IPv6 addresses (e.g., `[fc00::1]`) because it relied on an IPv4 regex and did not parse/validate IPv6 literals enclosed in brackets.
+**Learning:** `new URL().hostname` preserves brackets for IPv6 addresses. String-based validation must account for this format and strip brackets before checking against IP ranges. Synchronous validation is error-prone and should only be a fallback or first line of defense; `isSafeUrlAsync` (DNS-based) is preferred.
+**Prevention:** Update string-based URL validators to explicitly handle and parse IPv6 bracket notation, delegating to a robust IP validator.
