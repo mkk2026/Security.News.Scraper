@@ -27,3 +27,8 @@
 **Vulnerability:** Webhook notifications were vulnerable to SSRF because `fetch` automatically follows redirects, allowing attackers to bypass initial URL validation by redirecting to an internal IP (e.g., `127.0.0.1`).
 **Learning:** Initial URL validation is insufficient against sophisticated SSRF attacks involving redirects (TOCTOU). `fetch` API in Node/Bun does not offer native "safe redirect" handling.
 **Prevention:** Implement a custom `safeFetch` wrapper that handles redirects manually (`redirect: 'manual'`) and validates each intermediate URL against the security policy before following.
+
+## 2026-02-08 - ReDoS via Dynamic Regex Generation
+**Vulnerability:** The CVE extractor created a new RegExp for every CVE ID found in the text to scan for associated CVSS scores. With 5000+ CVEs, this caused O(N*M) complexity (3s+ processing time), enabling DoS attacks via malicious content.
+**Learning:** Dynamic regex generation inside loops, especially with user-controlled patterns or large inputs, scales poorly and risks ReDoS. Simple string methods like `indexOf` are orders of magnitude faster and safer for this purpose.
+**Prevention:** Replace dynamic regex loops with O(N) single-pass scans or static string searches. Enforce character limits on substring scans when parsing untrusted text.
