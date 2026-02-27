@@ -86,7 +86,12 @@ export function isSafeUrl(urlStr: string): boolean {
 
     // Block localhost
     if (hostname === 'localhost') return false;
-    if (hostname === '[::1]') return false; // IPv6 loopback
+
+    // Check for IPv6 (enclosed in brackets)
+    if (hostname.startsWith('[') && hostname.endsWith(']')) {
+      const ipv6 = hostname.slice(1, -1);
+      if (isPrivateIPv6(ipv6)) return false;
+    }
 
     // Check if hostname is an IPv4 address
     const ipv4Regex = /^(\d{1,3}\.){3}\d{1,3}$/;
