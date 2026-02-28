@@ -135,7 +135,8 @@ export default function SecurityDashboard() {
 
     if (activeTab === 'recent') {
       // Create a shallow copy before sorting to avoid mutating the original array
-      result = [...result].sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()).slice(0, 10)
+      // Using string comparison for ISO 8601 dates is significantly faster than new Date()
+      result = [...result].sort((a, b) => b.publishedAt < a.publishedAt ? -1 : (b.publishedAt > a.publishedAt ? 1 : 0)).slice(0, 10)
     }
 
     return result
