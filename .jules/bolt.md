@@ -23,3 +23,7 @@
 ## 2025-02-22 - [Optimized Text Rendering]
 **Learning:** Using `dangerouslySetInnerHTML` with complex regex replacement for highlighting (e.g., `highlightCves`) is expensive (approx. 7ms/call vs 0.3ms/check).
 **Action:** Implement a fast pre-check (e.g., `hasCves` using `regex.test()`) to conditionally bypass expensive rendering paths when the data doesn't require it.
+
+## 2025-02-22 - [ISO 8601 Date Sorting]
+**Learning:** Parsing ISO 8601 date strings into `Date` objects inside an array `sort()` callback adds significant CPU overhead because it instantiates a new object for every comparison. Since ISO 8601 formats (e.g., `YYYY-MM-DDTHH:mm:ss.sssZ`) are lexicographically sortable, direct string comparison is orders of magnitude faster.
+**Action:** When sorting arrays by ISO 8601 date strings, use simple string comparison (`a < b ? -1 : (a > b ? 1 : 0)`) instead of `new Date(a).getTime() - new Date(b).getTime()`.
