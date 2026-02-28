@@ -1,9 +1,9 @@
-import { timingSafeEqual } from 'crypto';
+import { timingSafeEqual, createHash } from 'crypto';
 
 /**
  * Validates the API request using a Bearer token.
  * Compares the token against the API_SECRET_TOKEN environment variable
- * using a timing-safe comparison.
+ * using a timing-safe comparison of their hashes to prevent length extension and timing attacks.
  */
 export function validateApiRequest(req: Request): boolean {
   const authHeader = req.headers.get('Authorization');
@@ -20,14 +20,10 @@ export function validateApiRequest(req: Request): boolean {
   }
 
   try {
-    const tokenBuffer = Buffer.from(token);
-    const secretBuffer = Buffer.from(secret);
+    const tokenHash = createHash('sha256').update(token).digest();
+    const secretHash = createHash('sha256').update(secret).digest();
 
-    if (tokenBuffer.length !== secretBuffer.length) {
-      return false;
-    }
-
-    return timingSafeEqual(tokenBuffer, secretBuffer);
+    return timingSafeEqual(tokenHash, secretHash);
   } catch (error) {
     console.error('Error validating API token:', error);
     return false;
