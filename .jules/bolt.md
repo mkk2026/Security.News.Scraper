@@ -23,3 +23,7 @@
 ## 2025-02-22 - [Optimized Text Rendering]
 **Learning:** Using `dangerouslySetInnerHTML` with complex regex replacement for highlighting (e.g., `highlightCves`) is expensive (approx. 7ms/call vs 0.3ms/check).
 **Action:** Implement a fast pre-check (e.g., `hasCves` using `regex.test()`) to conditionally bypass expensive rendering paths when the data doesn't require it.
+
+## 2025-02-24 - [Date Object Instantiation in Loops]
+**Learning:** Creating `new Date()` objects inside high-frequency loops (like array `.sort()` comparators) causes measurable memory allocation and CPU overhead, especially during derived state calculations on every keystroke.
+**Action:** When sorting arrays by ISO 8601 date strings (e.g., `2023-10-25T14:30:00Z`), use direct lexicographical string comparison (`> / <`) instead of parsing them into Date objects.
